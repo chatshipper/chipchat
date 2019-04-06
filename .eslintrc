@@ -1,0 +1,31 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:node/recommended",
+    "airbnb-base"
+  ],
+  "env": {
+    "node": true,
+    "mocha": true
+  },
+  "globals": {
+    "DEVELOPMENT": false,
+    "PRODUCTION": false,
+    "__DEBUG__": false,
+    "sinon": false,
+    "expect": false,
+    "assert": false
+  },
+  "rules": {
+    "strict": 0,
+    "indent": [2, 4, {"SwitchCase": 1}],
+    "no-underscore-dangle": 0,
+    "no-multi-spaces": [2, { "exceptions": { "VariableDeclarator": true, "ImportDeclaration": true } } ],
+    "spaced-comment": 0,
+    "comma-dangle": [2, "never"],
+    "quote-props": [1, "consistent-as-needed"],
+    "object-curly-newline": 0,
+    "no-console": 0,
+    "prefer-destructuring": 0
+  }
+}

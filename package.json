@@ -1,0 +1,54 @@
+{
+  "name": "ChipChat",
+  "version": "0.0.1",
+  "description": "ChatShipper JavaScript SDK",
+  "main": "./lib/index.js",
+  "engines": {
+    "node": ">=6.1.14"
+  },
+  "scripts": {
+    "jsdoc": "jsdoc -P ./package.json -r lib/ -d jsdoc/",
+    "test": "npm run lint",
+    "test:watch": "npm test -- --watch",
+    "test:examples": "node examples/",
+    "lint": "eslint lib",
+    "prepublish": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chatshipper/chipchat.git"
+  },
+  "keywords": [
+    "api",
+    "client",
+    "messaging",
+    "sdk",
+    "bot",
+    "chatbot",
+    "chat"
+  ],
+  "author": "ChatShipper Team <team@chatshipper.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chatshipper/chipchat/issues"
+  },
+  "homepage": "https://github.com/chatshipper/chipchat#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "debug": "^4.1.0",
+    "eventemitter2": "^5.0.1",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.2.1",
+    "mocha": "^5.2.0",
+    "mware": "^1.0.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^8.0.0",
+    "jsdoc": "^3.5.5"
+  }
+}
