@@ -1,5 +1,5 @@
 {
-  "name": "ChipChat",
+  "name": "chipchat",
   "version": "0.0.1",
   "description": "ChatShipper JavaScript SDK",
   "main": "./lib/index.js",
