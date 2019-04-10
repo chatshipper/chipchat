@@ -6,11 +6,13 @@ const bot = new Bot({
     token: process.env.TOKEN
 });
 
-bot.listContacts({ limit: 5, sort: '-createdAt' },
+const options = { limit: 5, sort: '-createdAt' };
+
+bot.contacts.list(options,
     (err, contacts) => console.log(`${contacts.length} contacts returned`));
 
-bot.listContacts({ limit: 5, sort: '-createdAt' })
-    .then(contacts => (contacts[0] ? bot.getContact(contacts[0].id) : null))
+bot.contacts.list(options)
+    .then(contacts => (contacts[0] ? bot.contacts.get(contacts[0].id) : null))
     .then((contact) => {
         console.log('contact', contact);
     })

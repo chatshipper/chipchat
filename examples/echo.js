@@ -10,7 +10,7 @@ bot.on('message.create.system.chat', (payload, actions) => {
     console.log('on.message', payload.text);
     if (payload.text === 'Ping') {
         //lastConversation = payload.conversation;
-        actions.reply({ text: 'Pong' }, (err) => {
+        actions.say('Pong', (err) => {
             if (err) throw err;
             console.log('Ponged back');
         });
