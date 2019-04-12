@@ -20,20 +20,39 @@ The package needs to be configured with your account's API token which is availa
 
 const ChipChat = require('chipchat');
 
+// Create a new bot instance
 const bot = new ChipChat({
-  token: process.env.TOKEN
-});
-bot.getUser().then(function(myProfile) {
-  console.log("Hello " + myProfile.name);
-});
-bot.on('message', (msg, cnv) => {
-  const text = msg.text;
-  chat.say(`Echo: ${text}`);
+    token: process.env.TOKEN
 });
 
-bot.on('notify', (msg, ctx) => ctx.join());
-bot.on('message', (msg, ctx) => ctx.reply('👍'));
+// Use any REST resource
+bot.users.get(bot.auth.user).then((botUser) => {
+    console.log(`Hello ${botUser.name}`);
+});
 
+// Listen to some resource events
+bot.on('user.login', (payload) => {
+    console.log(payload.activity.summary);
+});
+bot.on('organization.create', (payload) => {
+    console.log('Organization created', payload.activity.summary);
+});
+
+// Accept all channel notifications
+bot.on('notify', (msg, ctx) => ctx.accept());
+
+// Echo all messages as text
+bot.on('message', (msg, ctx) => ctx.say(`Echo: ${msg.text}`));
+
+// Subscribe using wildcards, respond to consumer
+bot.on('message.*.contact.*', (msg, ctx) => {
+    ctx.say({ text: '👍', role: 'agent' });
+});
+
+// Listen to utterances
+bot.onText(['hi', /hello/], (ctx) => ctx.reply('Hey there'));
+
+// Start Express.js webhook server to start listening
 bot.start();
 
 ```
@@ -46,7 +65,6 @@ bot.start();
 - Subscribe to **events**.
 - http/https/express.js compatible webhooks
 - Easy to extend
-
 
 ## Getting Started
 
@@ -67,14 +85,68 @@ const bot = new ChipChat({
 });
 ```
 
-- Subscribe to messages sent by the user with the `bot.on()` method, and reply using the `chat` object:
+- Subscribe to messages sent by the user with the `bot.on()` and `bot.onText` methods, and reply using the `chat` object:
 ```javascript
-bot.on('message', (payload, chat) => {
-  const text = payload.message.text;
-  console.log(`The user said: ${text}`);
+bot.on('message', (message, chat) => {
+  const text = message.text;
   chat.say(`You said: ${text}`).then(() => {
     chat.say('How are you today?');
   });
+});
+bot.onText(['hello', 'hi', /hey( there)?/i], (payload, chat) => {
+  chat.say('You said "hello", "hi", "hey", or "hey there"');
+});
+
+bot.onText(['help'], (payload, chat) => {
+  // Send a text message with buttons
+  chat.say({
+    text: 'What do you need help with?',
+    actions: [
+      { type: 'postback', text: 'Settings', payload: 'HELP_SETTINGS' },
+      { type: 'postback', text: 'FAQ', payload: 'HELP_FAQ' },
+      { type: 'postback', text: 'Talk to a human', payload: 'HELP_HUMAN' }
+    ]
+  });
+});
+
+bot.onText('image', (payload, chat) => {
+  // Send an attachment
+  chat.say({
+    contentType: 'image/png',
+    text: 'http://example.com/image.png'
+  });
+});
+```
+
+- Start a conversation and keep the user's answers in `context`:
+
+```javascript
+bot.on('message', (payload, chat) => {
+
+    const sendSummary = (ctx) => {
+        ctx.say(`Ok, here's what you told me about you:
+            - Name: ${ctx.get('name')}
+            - Favorite Food: ${ctx.get('food')}`);
+        ctx.leave();
+    };
+
+    const askFavoriteFood = (conv) => {
+        conv.ask("What's your favorite food?", (msg, ctx) => {
+            const text = msg.text;
+            ctx.set('food', text);
+            ctx.ask(`So your favorite food is ${text}?`, () => sendSummary(ctx));
+        });
+    };
+
+    const askName = (conv) => {
+        conv.ask("What's your name?", (msg, ctx) => {
+            const text = msg.text;
+            ctx.set('name', text);
+            ctx.say(`Oh, your name is ${text}`, () => askFavoriteFood(ctx));
+        });
+    };
+
+    askName(chat);
 });
 ```
 
@@ -96,18 +168,31 @@ bot.start();
 - Start up your bot by running node:
 ```
 $ node index.js
-> BootBot running on port 3000
-> Facebook Webhook running on localhost:3000/webhook
+> ChipChat Webhook running on localhost:4002
 ```
 
 - If you want to test your bot locally, install a localhost tunnel like [ngrok](https://ngrok.com/) and run it on your bot's port:
 
 ```
-$ ngrok http 3000
+$ ngrok http 4002
 ```
 
 Then use the provided HTTPS URL to config your webhook on Facebook's Dashboard. For example if the URL provided by ngrok is `https://99b8d4c2.ngrok.io`, use `https://99b8d4c2.ngrok.io/webhook`.
 
+## Error handling
+
+By default ChipChat will print all errors to stderr and rethrow the error.
+
+To perform custom error-handling logic, just subscribe to the `error` event:
+```
+const bot = new ChipChat({
+  token: process.env.TOKEN
+});
+
+bot.on('error', (err) => {
+  console.log('Ooops', err)
+})
+```
 
 ## Authentication Token
 
@@ -124,15 +209,15 @@ If authentication succeeds, you will get a JSON response containing your authent
 
 ## API Resources
 
-All organization resources available through the API can be accessed by the SDK: 'User', 'UserGroup', 'Channel', 'Contact', 'Conversation', 'Message', 'Organization', 'OrganizationGroup', 'Service', 'Form', 'Workflow', 'Metric', 'Kbase', 'Kbitem', 'Article', 'Event', 'File' and 'Location'.
+All organization resources available through the API can be accessed by the SDK: 'users', 'channels', 'contacts', 'conversations', 'messages', 'organizations', 'orggroups', 'services', 'forms', 'workflows', 'kbases', 'kbitems', 'articles' and 'files'.
 
 Each resource has the following methods available to it:
 
-* get<Resource>s
-* get<Resource>
-* create<Resource>
-* update<Resource>
-* delete<Resource>
+* list
+* get
+* create
+* update
+* delete
 
 Example:
 
