@@ -6,15 +6,18 @@ const bot = new Bot({
     token: process.env.TOKEN
 });
 
-bot.on('message.create.system.chat', (payload, actions) => {
+bot.on('message.create.*.chat', (payload, actions) => {
     console.log('on.message', payload.text);
     if (payload.text === 'Ping') {
-        //lastConversation = payload.conversation;
         actions.say('Pong', (err) => {
             if (err) throw err;
             console.log('Ponged back');
         });
     }
+});
+
+bot.onAny((event, msg, ctx) => {
+    console.log('any', event, ctx.name);
 });
 
 bot.on('error', (err) => {
