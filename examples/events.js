@@ -7,7 +7,7 @@ const bot = new Bot({
 });
 
 bot.on('ready', () => {
-    console.log('ready', bot.user);
+    console.log('ready', bot.auth);
 });
 
 bot.on('error', (err) => {
@@ -31,8 +31,12 @@ bot.on('message', (payload, ctx) => {
     });
 });
 
-bot.onAny((event, payload) => {
-    console.log('All events trigger this.', event, payload.event); //, JSON.stringify(payload));
+bot.onAny((event, payload, ctx) => {
+    if (ctx) {
+        console.log('Message event triggered:', event, Object.keys(payload).join(','));
+    } else {
+        console.log('Non-message event triggered:', event, Object.keys(payload).join(','));
+    }
 });
 
 bot.onText([/hi/, 'hello'], (msg, [source, match]) => {
