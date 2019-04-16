@@ -10,9 +10,9 @@ bot.users.get(bot.auth.user).then((botUser) => {
 });
 bot.on('message', (msg, ctx) => {
     ctx.say({ text: '👍', role: 'agent' });
+    ctx.leave();
 });
 
 bot.on('notify', (msg, ctx) => ctx.accept());
-bot.on('message', (msg, ctx) => ctx.say(`Echo: ${msg.text}`));
 
 bot.start();
