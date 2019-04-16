@@ -1,6 +1,6 @@
 {
   "name": "chipchat",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ChatShipper JavaScript SDK",
   "main": "./lib/index.js",
   "engines": {
