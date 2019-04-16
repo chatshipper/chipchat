@@ -12,7 +12,13 @@
     "test:watch": "npm test -- --watch",
     "test:examples": "node examples/",
     "lint": "eslint lib",
-    "prepublish": "npm run test"
+    "prepublish": "npm run test",
+    "preversion": "npm run test",
+    "version": "",
+    "postversion": "git push && git push --tags",
+    "release-patch": "npm version patch --force -m \"version %s\"",
+    "release-minor": "npm version minor --force -m \"version %s\"",
+    "release-major": "npm version major --force -m \"version %s\""
   },
   "repository": {
     "type": "git",
