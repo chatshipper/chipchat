@@ -1,0 +1,3 @@
+# ChipChat Docs
+
+Events Placeholder.
