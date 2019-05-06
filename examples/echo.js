@@ -17,7 +17,7 @@ bot.on('message.create.*.chat', (payload, actions) => {
 });
 
 bot.onAny((event, msg, ctx) => {
-    console.log('any', event, ctx.name);
+    console.log('any', event, ctx ? ctx.name : 'no context');
 });
 
 bot.on('error', (err) => {
