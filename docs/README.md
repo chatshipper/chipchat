@@ -1,3 +1,0 @@
-# ChipChat Docs
-
-README Placeholder.
