@@ -44,6 +44,7 @@ jspm_packages/
 # Build/install artifacts
 /dist/
 /build/
+/jsdoc/
 
 # TypeScript v1 declaration files
 typings/
@@ -79,3 +80,4 @@ typings/
 .idea/
 *.iml
 .DS_Store
+
