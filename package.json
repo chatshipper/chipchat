@@ -8,6 +8,7 @@
   },
   "scripts": {
     "jsdoc": "jsdoc -P ./package.json -r lib/ -d jsdoc/",
+    "doc": "jsdoc2md lib/chipchat.js > docs/api.md && jsdoc2md lib/server.js >> docs/api.md && jsdoc2md lib/client.js >> docs/api.md",
     "test": "npm run lint",
     "test:watch": "npm test -- --watch",
     "test:examples": "node examples/",
