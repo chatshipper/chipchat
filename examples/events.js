@@ -44,7 +44,7 @@ bot.onText([/hi/, 'hello'], (msg, [source, match]) => {
     //let settingsMessage = (Object.keys(settings).length == 0) ?
     //'No settings. Please set settings by a /start command': settings;
     console.log('match', source, match);
-    bot.sendMessage(msg.conversation, 'Your settings');
+    bot.send(msg.conversation, 'Your settings');
 });
 
 bot.emit('foo', { bar: 'baz' });
