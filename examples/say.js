@@ -4,17 +4,17 @@ const Bot = require('../lib/chipchat');
 
 const sendRandom = (_, { say }) => {
     // these can be received by CS in any order, depending on network latency for each call
-    say('Welcome', { role: 'agent', delay: 500 });
-    say('Which car', { role: 'agent', delay: 6000 });
-    say('Choose ', { type: 'card', role: 'agent', delay: 12000 });
+    say('Message 1', { role: 'agent', delay: 500 });
+    say('Message 2', { role: 'agent', delay: 6000 });
+    say('Message 3', { type: 'card', role: 'agent', delay: 12000 });
 };
 
 const sendMulti = (_, { say }) => {
     // these are guaranteed to be received at once and processed by CS in-order
     say([
-        { text: 'Welcome', role: 'agent', delay: 500 },
-        { text: 'In which car', role: 'agent', delay: 6000 },
-        { text: 'Choose ', type: 'card', role: 'agent', delay: 12000 }
+        { text: 'Start', role: 'agent', delay: 500 },
+        { text: 'Step 1', role: 'agent', delay: 6000 },
+        { text: 'Step 2', type: 'card', role: 'agent', delay: 12000 }
     ]);
 };
 
@@ -26,20 +26,32 @@ const sendAsync = async (_, { say }) => {
 };
 
 const msgs = [
-    { text: 'Hi there, I will show you around in the world of bot writing...', role: 'agent', delay: 6000 },
-    { text: 'And start it by typing >w1on1bot cloudbotboilerplate start', role: 'agent', delay: 9000 },
-    { text: 'You can use Postman to have a look at this conversation which has id 5cd44b0d1684e7001058565b', role: 'agent', delay: 12000 },
-    { text: 'You can reset the bot flow by typing >w1on1bot cloudbotboilerplate reset', role: 'agent', delay: 15000 },
-    { text: 'Or jump to a specific step by typing >w1on1bot cloudbotboilerplate jump <stepname>', role: 'agent', delay: 18000 },
-    { text: 'You can view the bot\'s state by typing >w1on1bot cloudbotboilerplate showinfo', role: 'agent', delay: 21000 },
-    { text: 'You can wait for a question by passing waitForInput. Type anything to continue', role: 'agent', delay: 24000 }
+    { text: 'First message', role: 'agent', delay: 6000 },
+    { text: 'Second message', role: 'agent', delay: 9000 },
+    { text: 'Third message', role: 'agent', delay: 12000 },
+    { text: 'Fourth message', role: 'agent', delay: 15000 },
+    { text: 'Fifth message', role: 'agent', delay: 18000 }
 ];
-const sendAsync2 = (_, { say }) => {
-    msgs.forEach(async (m) => {
-        const saved = await say(m);
+const sendSequential = async (_, { say }) => {
+    let delay = 0;
+    for (const m of msgs) { // eslint-disable-line no-restricted-syntax
+        const saved = await say(m.text, { delay }); // eslint-disable-line no-await-in-loop
+        delay += 3000;
         console.log('m', JSON.stringify(saved));
-        return Promise.resolve(1);
-    });
+    }
+};
+
+const sendParallel = async (_, { say }) => {
+    const results = [];
+    let delay = 0;
+    for (const m of msgs) { // eslint-disable-line no-restricted-syntax
+        // All asynchronous operations are immediately started.
+        results.push(say(m.text, { delay }));
+        delay += 3000;
+    }
+    // Now that all the asynchronous operations are running, here we wait until they all complete.
+    const res = await Promise.all(results);
+    console.log('res', res);
 };
 
 const bot = new Bot({
@@ -47,8 +59,9 @@ const bot = new Bot({
 });
 
 bot
-    .on('message.create.contact.chat.agent', { text: /random/i }, sendRandom)
+    .onText(/random/i, sendRandom)
     .onText('multi', { role: 'agent' }, sendMulti)
     .onText('async', { type: 'chat' }, sendAsync)
-    .onText('iterate', { type: 'chat' }, sendAsync2)
+    .onText('iterate', { type: 'chat' }, sendSequential)
+    .onText('parallel', { type: 'chat' }, sendParallel)
     .start();
