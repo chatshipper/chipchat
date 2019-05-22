@@ -11,10 +11,26 @@ bot.on('ready', () => {
 });
 
 bot.on('error', (err) => {
-    console.log('err', err);
+    console.log('handle error', err);
 });
 
-bot.on('message', (payload, chat) => {
+bot.on('message', (_, conversation) => {
+    const convId = conversation.id; //'5cd8c48dabd2dc52deb1cfb2';
+    bot.conversation(convId).then(ctx => ctx.say('Hooked in1'));
+    bot.conversation(convId, (err, ctx) => ctx.say('Hooked in2'));
+
+    bot.conversation(null, err => console.log('ERROR', err.toString()));
+    bot.conversation(null).then(ctx => ctx.say('Error bypassed')).catch(err => console.log('ERROR PROMISE', err.toString()));
+
+    bot.conversations.list().then(convs => console.log('fetched convs', convs.length));
+    console.log('convsprop', bot.conversations);
+
+    bot.conversations.create({ messages: [{ text: 'Hi' }] })
+        .then(conv => console.log('created', conv.name))
+        .catch(err => console.log('created err', err.toString()));
+});
+
+bot.on('message', (_, conversation) => {
     const sendSummary = (ctx) => {
         ctx.say(`Ok, here's what you told me about you:
             - Name: ${ctx.get('name')}
@@ -40,7 +56,7 @@ bot.on('message', (payload, chat) => {
         });
     };
 
-    askName(chat);
+    askName(conversation);
 });
 
 bot.start();
