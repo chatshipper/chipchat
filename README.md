@@ -482,7 +482,7 @@ http.createServer(bot.httpMiddleware()).listen(3200);
 console.log('Bot server running at port 3200.');
 ```
 ### Express Middleware
-Use `chipchat.expressRouter()` to integrate ChipChat into your Express app:
+Use `chipchat.router()` to integrate ChipChat into your Express app:
 ```
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -493,7 +493,7 @@ app.use(bodyParser.json({
     verify: chipchat.getVerifySignature(process.env.APP_SECRET)
 }));
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use("/webhook", chipchat.expressRouter());
+app.use("/webhook", chipchat.router());
 app.listen(3000);
 ```
 
