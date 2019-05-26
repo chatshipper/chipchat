@@ -76,6 +76,12 @@ You can subscribe to any webhook callback events received by the webhook with th
 
 See [Events](https://github.com/chatshipper/chipchat/tree/master/docs/events.md) for more information on event subsriptions; read [Ingesting Events](https://github.com/chatshipper/chipchat/tree/master/docs/ingest.md) to see how to process payloads from webhooks and other sources.
 
+## Sending Messages
+
+A conversation context encapsulates all properties of a ChatShipper conversation, augmented with message sending methods.
+
+See [Conversations](docs/conversation.md) for more information.
+
 ## Extending ChipChat
 
 ### Mixins
