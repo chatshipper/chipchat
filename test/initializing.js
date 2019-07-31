@@ -1,5 +1,5 @@
 const sinon = require('sinon');
-const expect = require('chai').expect;
+const assert = require('assert');
 const Bot = require('../lib/chipchat');
 
 describe('Create a new bot', () => {
@@ -20,12 +20,12 @@ describe('Create a new bot', () => {
 
     it('should be a Bot', () => {
         bot = new Bot();
-        expect(bot instanceof Bot).to.equal(true);
+        assert(bot instanceof Bot, true, 'not a bot');
     });
 
     it('should have a valid authentication object after initilizing with a correct token', () => {
         bot = new Bot(options);
-        expect(bot.auth).to.deep.equal({
+        assert.deepStrictEqual(bot.auth, {
             exp: 1564655703,
             iat: 1564569303,
             organization: '5978bf4b0296404e6f9947e5',
@@ -34,10 +34,10 @@ describe('Create a new bot', () => {
     });
     it('should not have an authentication object after initilizing without token', () => {
         bot = new Bot();
-        expect(bot.auth).to.equal(undefined);
+        assert.strictEqual(bot.auth, undefined);
     });
     it('should not have an authentication object after initilizing with incorrect token', () => {
         bot = new Bot({ token: 'invalid' });
-        expect(bot.auth).to.equal(undefined);
+        assert.strictEqual(bot.auth, undefined);
     });
 });
