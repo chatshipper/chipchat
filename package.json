@@ -9,7 +9,7 @@
   "scripts": {
     "jsdoc": "jsdoc -P ./package.json -r lib/ -d jsdoc/",
     "doc": "jsdoc2md lib/chipchat.js > docs/api.md && jsdoc2md lib/server.js >> docs/api.md && jsdoc2md lib/client.js >> docs/api.md",
-    "test": "npm run lint",
+    "test": "mocha",
     "test:watch": "npm test -- --watch",
     "test:examples": "node examples/",
     "lint": "eslint lib",
@@ -48,7 +48,6 @@
     "eventemitter2": "^5.0.1",
     "express": "^4.16.4",
     "jsonwebtoken": "^8.2.1",
-    "mocha": "^5.2.0",
     "mware": "^1.0.1",
     "request": "^2.88.0",
     "request-promise": "^4.1.1"
@@ -58,6 +57,9 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^8.0.0",
-    "jsdoc": "^3.6.3"
+    "jsdoc": "^3.6.3",
+    "mocha": "^5.2.0",
+    "chai": "^4.2.0",
+    "sinon": "^7.3.2"
   }
 }
