@@ -61,6 +61,21 @@ describe('bot.ingest', () => {
             const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: USER, text: 'hi' } } };
             bot.ingest(payload);
         });
+        it('should not ignore message from self when ignoreSelf is disabled', () => {
+            const bot = new Bot({ token: TOKEN, ignoreSelf: false });
+            const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: USER, text: 'hi' } } };
+            bot.on('message', (message, conversation) => {
+                //should receive the message
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.on('error', (error) => {
+                //should not have errors
+                assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
+            });
+            bot.ingest(payload);
+        });
         it('should ignore message from other bots (ignoreBotsMiddleware)', () => {
             const bot = new Bot({ token: TOKEN });
             bot.on('message', (message, conversation) => {
@@ -68,10 +83,25 @@ describe('bot.ingest', () => {
                 assert.deepStrictEqual(null, message, `should not receive this message: ${conversation.id}, ${message.text}`);
             });
             bot.on('error', (error) => {
-                //should not get here, no errors were triggered
+                //should not have errors
                 assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
             });
             const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: '', role: 'bot', text: 'hi' } } };
+            bot.ingest(payload);
+        });
+        it('should not ignore message from other bots when ignoreBots is disabled', () => {
+            const bot = new Bot({ token: TOKEN, ignoreBots: false });
+            const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: '', role: 'bot', text: 'hi' } } };
+            bot.on('message', (message, conversation) => {
+                //should receive the message
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.on('error', (error) => {
+                //should not have errors
+                assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
+            });
             bot.ingest(payload);
         });
     });
