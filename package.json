@@ -9,7 +9,7 @@
   "scripts": {
     "jsdoc": "jsdoc -P ./package.json -r lib/ -d jsdoc/",
     "doc": "jsdoc2md lib/chipchat.js > docs/api.md && jsdoc2md lib/server.js >> docs/api.md && jsdoc2md lib/client.js >> docs/api.md",
-    "test": "mocha",
+    "test": "nyc mocha",
     "test:watch": "npm test -- --watch",
     "test:examples": "node examples/",
     "lint": "eslint lib",
@@ -60,6 +60,7 @@
     "jsdoc": "^3.6.3",
     "mocha": "^5.2.0",
     "mock-require": "^3.0.3",
+    "nyc": "^14.1.1",
     "sinon": "^7.3.2"
   }
 }
