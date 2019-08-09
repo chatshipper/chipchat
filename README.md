@@ -101,6 +101,20 @@ See [Extending](https://github.com/chatshipper/chipchat/tree/master/docs/extendi
 ## Examples
 
 For examples see the [examples](https://github.com/chatshipper/chipchat/tree/master/examples) folder. To try any of the examples:
+### Testing
+
+```bash
+# normal test
+npm run test
+
+# coverage
+npm run test:coverage
+
+# coverage to html files
+# you can inspect the areas that need more testing
+npm run test:coverage:html
+# then open ./coverage/index.html in your favorite browser
+```
 
 ### Configure environment:
 
