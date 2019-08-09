@@ -1,3 +1,4 @@
+/* eslint no-plusplus:0 */
 const assert = require('assert');
 const mock = require('mock-require');
 const sinon = require('sinon');
@@ -23,7 +24,9 @@ const RESOURCES = [
     'workflows', 'metrics',
     'kbases', 'kbitems', 'articles', 'files'
 ];
+//const wait = ms => new Promise(resolve => setTimeout(resolve), ms);
 const equal = assert.deepStrictEqual;
+//use it.only to run one test
 
 describe('Client tests', () => {
     describe('A bot should have all the resources', () => {
@@ -39,71 +42,69 @@ describe('Client tests', () => {
             const bot = new Bot({ token: TOKEN });
             request.resetHistory();
             request.resolves(true);
-            bot.users.get('123456').then(() => {
+            return bot.users.get('123456').then(() => {
                 equal(request.calledOnce, true);
-            }).catch((e) => {
-                equal(true, false, `should not have error ${e}`);
             });
         });
-        it('A bot\'s resource should not return a promise when a callback is passed', () => {
+        it('A bot\'s resource should not return a promise when a callback is passed', (done) => {
             const bot = new Bot({ token: TOKEN });
             request.resetHistory();
             request.resolves(true);
-            bot.users.get('123456', () => {
+            const answer = bot.users.get('123456', () => {
                 equal(request.calledOnce, true);
-            }).then(() => {
-                // no promise is return when using a callback
-                equal(true, false, 'should not return a promise');
-            }).catch((e) => {
-                if (e.code && e.code !== 'ERR_ASSERTION') equal(true, false, `should not have error ${e.message}`);
+                done();
             });
+            // no promise is return when using a callback
+            equal(answer, null, 'should not return a promise');
         });
     });
     describe('Using send to add a message to a conversation', () => {
-        it('A promise is return when not using a callback', () => {
+        it('A promise is return when not using a callback', (done) => {
             const bot = new Bot({ token: TOKEN });
             request.resetHistory();
             request.resolves(true);
             const payload = {};
             bot.send('convid', payload).then(() => {
                 equal(request.calledOnce, true);
+                done();
             }).catch((e) => {
                 equal(true, false, `should not have error ${e}`);
             });
         });
-        it('No promise is return when using a callback', () => {
+        it('No promise is returned when using a callback', (done) => {
             const bot = new Bot({ token: TOKEN });
             request.resetHistory();
             request.resolves(true);
             const payload = {};
-            bot.send('convid', payload, () => {
+            const notPromise = bot.send('convid', payload, () => {
                 equal(request.calledOnce, true);
-            }).then(() => {
-                // no promise is return when using a callback
-                equal(true, false, 'should not return a promise');
-            }).catch((e) => {
-                if (e.code && e.code !== 'ERR_ASSERTION') equal(true, false, `should not have error ${e.message}`);
+                done();
             });
+            // no promise is return when using a callback
+            equal(notPromise, null, 'should not return a promise');
         });
-        it('You can send a text direcly', () => {
+        it('You can send a text direcly', (done) => {
             const bot = new Bot({ token: TOKEN });
             request.resetHistory();
             request.resolvesArg(0);
             bot.send('convid', 'hi there').then((usedPayload) => {
                 equal(request.calledOnce, true);
                 equal(usedPayload.body.text, 'hi there');
+                done();
             });
         });
         it('You can send a text direcly', () => {
             const bot = new Bot({ token: TOKEN });
             request.resetHistory();
             request.resolvesArg(0);
-            bot.send('convid', 'hi there').then((usedPayload) => {
+            return bot.send('convid', 'hi there').then((usedPayload) => {
                 equal(request.calledOnce, true);
                 equal(usedPayload.body.text, 'hi there');
             });
         });
-        it('You can use say to a text direcly', async () => {
+    });
+    describe('Using say on the context to add a message to a conversation', () => {
+        it('By using the Promise variant', async () => {
             const bot = new Bot({ token: TOKEN, ignoreSelf: false });
             const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: USER, text: 'hi' } } };
             request.resetHistory();
@@ -112,9 +113,78 @@ describe('Client tests', () => {
                 equal(m.text, 'hi');
                 const usedPayload = await c.say('hi there bot');
                 equal(usedPayload.body.text, 'hi there bot');
-                equal(request.callCount, 1);
             });
             await bot.ingest(payload);
+        });
+        it('By using the Callback variant', async () => {
+            const bot = new Bot({ token: TOKEN, ignoreSelf: false });
+            const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: USER, text: 'hi' } } };
+            request.resetHistory();
+            request.resolvesArg(0);
+            bot.on('message', (m, c) => {
+                equal(m.text, 'hi');
+                c.say('hi there bot', (err, data) => {
+                    equal(err, null);
+                    equal(data.body.text, 'hi there bot');
+                });
+            });
+            await bot.ingest(payload);
+        });
+    });
+    describe('Using ask on the context', () => {
+        it('By using the Callback variant', (done) => {
+            const bot = new Bot({ token: TOKEN, ignoreSelf: false });
+            const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345, meta: {} }, message: { type: 'chat', id: 1, conversation: 123456, user: USER, text: 'hi', role: 'contact' } } };
+            payload.data.conversation.meta[`_asked${USER}`] = true;
+            const payload2 = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345, meta: {} }, message: { type: 'chat', id: 2, conversation: 123456, user: USER, text: 'Mischa', role: 'contact' } } };
+            payload2.data.conversation.meta[`_asked${USER}`] = true;
+            request.resetHistory();
+            request.resolvesArg(0);
+            let answer;
+            let asked;
+            let nrmessages = 0;
+            bot.on('message.create.contact.chat', (m, c) => {
+                nrmessages++;
+                asked = c.ask('what is your name', (ans) => {
+                    answer = ans;
+                });
+            });
+            bot.ingest(payload);
+            setTimeout(() => { // give time to process payload
+                bot.ingest(payload2);
+                setTimeout(() => { // give time to process payload2
+                    equal(answer.text, 'Mischa');
+                    equal(asked, null, 'Should not return a Promise');
+                    equal(nrmessages, 1, 'Should not trigger message.create.contact.chat for the answer');
+                    done();
+                }, 10);
+            }, 10);
+        });
+        it('By using the Promise variant', (done) => {
+            const bot = new Bot({ token: TOKEN, ignoreSelf: false });
+            const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345, meta: {} }, message: { type: 'chat', id: 1, conversation: 123456, user: USER, text: 'hi', role: 'contact' } } };
+            const payload2 = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345, meta: {} }, message: { type: 'chat', id: 2, conversation: 123456, user: USER, text: 'Mischa', role: 'contact' } } };
+            payload2.data.conversation.meta[`_asked${USER}`] = true;
+            request.resetHistory();
+            request.resolvesArg(0);
+            let m2;
+            let c2;
+            bot.on('message.create.contact.chat', async (m, c) => {
+                try {
+                    [m2, c2] = await c.ask('what is your name');
+                } catch (e) {
+                    equal(true, false, 'should not raise error');
+                }
+            });
+            bot.ingest(payload);
+            setTimeout(() => { // give time to process payload
+                bot.ingest(payload2);
+                setTimeout(() => { // give time to process payload2
+                    equal(c2.organization, 12345);
+                    equal(m2.text, 'Mischa');
+                    done();
+                }, 10);
+            }, 10);
         });
     });
 });
