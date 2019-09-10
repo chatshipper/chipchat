@@ -21,7 +21,7 @@ const RESOURCES = [
     'contacts', 'conversations', 'messages',
     'organizations', 'orggroups', 'services', 'forms',
     'workflows', 'metrics',
-    'kbases', 'kbitems', 'articles', 'files'
+    'kbases', 'kbitems', 'articles', 'files', 'locations'
 ];
 const equal = assert.deepStrictEqual;
 
