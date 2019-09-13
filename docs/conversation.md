@@ -151,7 +151,7 @@ conversation.say([{ text: 'Hello World', role: 'bot' }]);
 ```
 If the first argument is an array, the options object is ignored.
 
-### `say() examples`
+##### say() examples
 
 ```javascript
 // Send a text message
@@ -310,10 +310,94 @@ const color = conversation.get('favoriteColor');
 conversation.say(`Your favorite color is ${color}!`);
 ```
 
+### Notifying channels and assigning users
+
+Automations can notify (groups of) users of any conversation, through personal and shared **inboxes**.
+
+A shared, multi-user inbox is called a ***channel***. The `/notify` command-type message puts the conversation in one or more channels, until it is accepted by one of the subscribed agents.
+
+In addition, each user has a _personal_ ***inbox*** to which the user is always subscribed.
+The `/assign` command-type message puts a conversation in a user's inbox. It will stay there until the user accepts the conversation.
+
+
+#### `conversation.notify([channel], [organization])`
+
+| Param | Type | Default | Required |
+|:------|:-----|:--------|:---------|
+| `channel` | string or array | | `N` |
+| `organization` | string or array | | `N` |
+
+The `notify` method (and the corresponding 'notify' command-type message it sends) can be used to send notifications into multi-user _channels_ that agents can subscribe to.
+
+Channels can be notified in two ways:
+1. triggered by ***routing rules***
+2. targeted directly as ***tasks***
+
+##### Routed notifications
+
+To trigger a channel notification based on ***routing rules***, simply call the method without arguments:
+```javascript
+conversation.notify();
+```
+This notification will be processed by the routing rules for all organizations upwards in the organization tree (the conversation owner and any parent organizations). To target any specific organization(s), provide the organization id(s) as the second argument. The following two calls are equivalent:
+```javascript
+conversation.notify(null, '59b5334fcf4bae0bc81878c6');
+conversation.notify(null, ['59b5334fcf4bae0bc81878c6']);
+```
+Routed channel notifications will be removed (dequeued) from _all routed channels_ when any agent accepts the conversation from any channel. This behaviour is identical to routing of an inbound contact message for a non-active conversation - in fact, in both cases the routing engine uses the last-received consumer message for rules matching.
+
+##### Task notifications
+
+Routing rules can be bypassed and target channels notified directly. Typical use case is, when you need one agent in a pool of agents (the channel) to accept, process and close the conversation. We call these targeted notifications **task notifications**.
+
+To notify one or more specific channels of the conversation, provide a channel or list of channels as the first method argument. The following two calls are equivalent:
+```javascript
+conversation.notify('5a437eb33c64832bf93423f0');
+conversation.notify(['5a437eb33c64832bf93423f0']);
+```
+In contrast to routed notifications, a targeted task notification will remain in the channel until it is accepted by an agent that is subscribed to that specific channel (and will remain in other, non-subscribed channels after that).
+
+For more information on the `/notify` command, see the [developer documentation](https://developers.chatshipper.com/docs/messaging-commands#section--notify) about this message type.
+
+#### `conversation.assign(users)`
+
+| Param | Type | Default | Required |
+|:------|:-----|:--------|:---------|
+| `users` | string or array | | `N` |
+
+Assign the conversation to one or more users. The users will receive an inbox notification, and the conversation will remain in the inbox until the user accepts the conversation.
+
+For more information on the `/assign` command, see the [developer documentation](https://developers.chatshipper.com/docs/messaging-commands#section--assign).
+
 ### Joining, Accepting and Leaving Conversations
 
 #### `conversation.join()`
 
+Join a conversation, by adding the bot to the conversation participants list.
+```javascript
+conversation.join();
+```
+This is done automatically when the first message is sent, so this function call is not strictly necessary; ChipChat does not currently treat joined conversations other than others.
+
 #### `conversation.accept()`
 
+Accept a conversation - join it as a participant, set the conversation status to 'active' (if not already), and assume  responsibility for replying to the consumer. While a conversation is accepted (and thus active), no channel notifications are sent to channels, and active agents are expected to handle any inbound messages. Only consumer-facing bots need to use this method.
+```javascript
+conversation.join();
+```
+
 #### `conversation.leave()`
+
+Leave the conversation. This is the equivalent of closing the conversation from the UI: if no other agents have it accepted, the conversation status will be set to 'closed', and any new inbound contact messages will now trigger routing notifications.
+
+Like the accept() function, leave() is only relevant for consumer-facing bots: there's usually no need to lock/release notification flows for bots that are not controlling the conversation (talking to consumers).
+
+As an example, for consumer bots it's a good practice to stop interacting with the consumer when another agent or bot accepts the conversation, or starts talking with the contact:
+```javascript
+function stop (_, conversation) {
+    conversation.set('mybot.status', 'finished');
+    conversation.leave();
+};
+bot.on('message.create.contact.command', { { text: ['/accept', '/join'] }, stop);
+bot.on('message.create.contact.chat.agent', { isBackchannel: false }, stop);
+```
