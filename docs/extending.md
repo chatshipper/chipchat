@@ -26,19 +26,22 @@ Modules are simple functions that you can use to organize your code in different
 
 #### `.module(factory)`
 
-The `factory` param is a function that gets called immediatly and receives the `bot` instance as its only parameter. For example:
+The `factory` param is a function that gets called immediatly and receives the `bot` instance and an optional options object as its parameters. For example:
 
 ```javascript
 // help-module.js
-module.exports = (bot) => {
+module.exports = (bot, options = {}) => {
   bot.hear('help', (payload, chat) => {
     // Send Help Menu to the user...
+    if (options.advanced) {
+        // do something advanced
+    }
   });
 };
 
 // index.js
 const helpModule = require('./help-module');
-bot.module(helpModule);
+bot.module(helpModule, { advanced: true });
 ```
 
 Take a look at the `examples/modules.js` file for a complete example.

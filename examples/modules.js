@@ -8,7 +8,7 @@ const bot = new Bot({
     token: process.env.TOKEN
 });
 
-bot.module(echoModule);
+bot.module(echoModule, { onlyOnce: true });
 bot.module(helpModule);
 
 bot.start();
