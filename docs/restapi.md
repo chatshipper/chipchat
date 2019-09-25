@@ -51,6 +51,16 @@ Get a specific resource.
 | options | <code>object</code> | Optional selection and population options |
 | callback | <code>function</code> | Optional Callback |
 
+```
+bot.forms.get('5d8aa90d8656c44b820e8690', (err, form) => {
+  if (err) {
+    console.log(err.toString()
+  } else {
+    console.log(`form ${form.name} returned`)
+  }
+});
+```
+
 <a name="create"></a>
 
 ## bot.&lt;resources&gt;.create(options, [callback])
@@ -61,35 +71,41 @@ Create a new resource.
 | options | <code>object</code> | New resource properties |
 | callback | <code>function</code> | Callback |
 
-```
-bot.conversations.create({ messages: [{ text: 'Hi' }] })
-  .then(conv => console.log('created', conv.name))
-  .catch(err => console.log('created err', err.toString()));
-```
-
 Example:
-
-    chipchat.conversations.create(
-      { name: 'Review'},
-      (conversation) => {
-            chipchat.say(conversation.id, 'Hello!');
-            chipchat.sendMessage(conversation.id, {
+```
+bot.conversations.create(
+    { name: 'Review', messages: [{ text: 'start' }] },
+    (err, conversation) => {
+        if (!err) {
+            bot.send(conversation.id, {
                 type: 'command',
                 text: '/notify'
             });
         }
-    );
-
+    }
+);
+```
 <a name="update"></a>
 
-## bot.&lt;resources&gt;.update(options, [callback])
+## bot.&lt;resources&gt;.update(id, options, [callback])
 Update a resource.
 
 | Param | Type | Description |
 | --- | --- | --- |
+| id | <code>string</code> | Resource ID |
 | options | <code>object</code> | Updated resource properties |
 | callback | <code>function</code> | Callback |
+```
+bot.organizations.update(
+    '5d840de6bd445020c70e6d64',
+    { tags: ["prime"] },
+    (err, organization) => {
+        if (!err) {
 
+        }
+    }
+);
+```
 <a name="delete"></a>
 
 ## bot.&lt;resources&gt;.delete(id, [callback])
@@ -99,11 +115,26 @@ Delete a resource.
 | --- | --- | --- |
 | id | <code>string</code> | Resource ID |
 | callback | <code>function</code> | Callback |
+```
+bot.services.delete(
+    '5d5d4a4fdf0f7d57f15325be',
+    (err) => {
+        if (!err) {
 
+        }
+    }
+);
+```
 
 ### Using Promises
 
-Every method returns a chainable promise which can be used instead of a regular callback:
+Every method returns a chainable promise which can be used instead of a regular callback. Simple example:
+```
+bot.conversations.create({ messages: [{ text: 'Hi' }] })
+  .then(conv => console.log('created', conv.name))
+  .catch(err => console.log('created err', err.toString()));
+```
+Here's an example of chaining the creation of multiple resources:
 
 ```javascript
 // Create a new customer and then a new charge for that customer:

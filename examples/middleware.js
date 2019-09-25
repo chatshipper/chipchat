@@ -67,7 +67,7 @@ bot.start();
 bot.conversations.list(
     { sort: '-createdAt', limit: 1 },
     (err, convs) => {
-        bot.sendMessage(
+        bot.send(
             convs[0].id, 'Hello Mware',
             (e, msg) => console.log('said', e && e.name, msg && msg.text) //msg.text)
         );
