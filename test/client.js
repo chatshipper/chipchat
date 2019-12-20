@@ -99,15 +99,6 @@ describe('Client tests', () => {
                 equal(usedPayload.body.text, 'hi there');
             });
         });
-        it('You can send a text direcly', () => {
-            const bot = new Bot({ token: TOKEN });
-            request.resetHistory();
-            request.resolvesArg(0);
-            bot.send('convid', 'hi there').then((usedPayload) => {
-                equal(request.calledOnce, true);
-                equal(usedPayload.body.text, 'hi there');
-            });
-        });
         it('You can use say to a text direcly', async () => {
             const bot = new Bot({ token: TOKEN, ignoreSelf: false });
             const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: USER, text: 'hi' } } };
