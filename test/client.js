@@ -1,6 +1,11 @@
 const assert = require('assert');
 const mock = require('mock-require');
 const sinon = require('sinon');
+const path = require('path');
+require('dotenv').config({
+    path: `${process.cwd()}${path.sep}.env.development`
+});
+
 
 //multi file reset
 sinon.restore();
@@ -12,7 +17,7 @@ mock('request-promise', request);
 
 const Bot = require('../lib/chipchat');
 
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjExMGRhZWU3MGJhYTQ4NWIxYjE2YmEiLCJvcmdhbml6YXRpb24iOiI1OTc4YmY0YjAyOTY0MDRlNmY5OTQ3ZTUiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJpYXQiOjE1NjQ1NjkzMDMsImV4cCI6MTU2NDY1NTcwM30.2q6isPDL5uMwtnyThVGN8Hq9UMqhzAkf72mZdVrSFgc';
+const TOKEN = process.env.TOKEN;
 const USER = '5b110daee70baa485b1b16ba';
 
 const METHODS = ['create', 'delete', 'get', 'list', 'update'];
