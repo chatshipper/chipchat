@@ -1,12 +1,17 @@
 /* eslint node/no-unsupported-features/es-syntax:0 */
 const mware = require('mware').default;
 const assert = require('assert');
+const path = require('path');
 const Bot = require('../lib/chipchat');
 
 const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjExMGRhZWU3MGJhYTQ4NWIxYjE2YmEiLCJvcmdhbml6YXRpb24iOiI1OTc4YmY0YjAyOTY0MDRlNmY5OTQ3ZTUiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJpYXQiOjE1NjQ1NjkzMDMsImV4cCI6MTU2NDY1NTcwM30.2q6isPDL5uMwtnyThVGN8Hq9UMqhzAkf72mZdVrSFgc';
 const USER = '5b110daee70baa485b1b16ba';
 const ORGANISATION = '5978bf4b0296404e6f9947e5';
-const HOST = 'https://api.chatshipper.com';
+require('dotenv').config({
+    path: `${process.cwd()}${path.sep}.env`
+});
+
+const HOST = process.env.APIHOST;
 
 const equal = assert.deepStrictEqual;
 
@@ -98,7 +103,7 @@ describe('Create a new bot', () => {
     });
     it('Should have the webhook path set to / by default', () => {
         const bot = new Bot();
-        equal(bot.webhook, '/');
+        equal(bot.webhook, process.env.WEBHOOK_PATH);
     });
     it('Should have the webhook path set by setting the webhook option', () => {
         const bot = new Bot({ webhook: '/hi' });

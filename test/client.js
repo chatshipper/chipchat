@@ -3,7 +3,7 @@ const mock = require('mock-require');
 const sinon = require('sinon');
 const path = require('path');
 require('dotenv').config({
-    path: `${process.cwd()}${path.sep}.env.development`
+    path: `${process.cwd()}${path.sep}.env`
 });
 
 
