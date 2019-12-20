@@ -18,6 +18,9 @@ mock('request-promise', request);
 const Bot = require('../lib/chipchat');
 
 const TOKEN = process.env.TESTTOKEN;
+if (!TOKEN) {
+    throw("\nWARNING: please add test token env var TESTTOKEN\n\n");
+}
 const USER = '5b110daee70baa485b1b16ba';
 
 const METHODS = ['create', 'delete', 'get', 'list', 'update'];
