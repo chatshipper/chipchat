@@ -17,7 +17,6 @@
     "lint": "eslint lib",
     "lintAndTests": "npm run lint && npm run test",
     "prepublishOnly": "echo prepublishOnly && npm run lintAndTests",
-    "prepare": "echo prepare && npm run lintAndTests",
     "preversion": "npm run lintAndTests",
     "version": "",
     "postversion": "git push && git push --tags",
