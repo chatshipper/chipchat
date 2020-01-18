@@ -98,13 +98,23 @@ Middlewares are functions that perform tasks before and after an operation (that
 
 See [Extending](https://github.com/chatshipper/chipchat/tree/master/docs/extending.md) for more information.
 
+## Environment variables
+
+See [Internal API spec](https://github.com/chatshipper/chipchat/tree/master/docs/api.md) for a full list of possible constructor options. Some options can also be specified as environment variables. These are:
+
+| Option | Environment variable | Default value |
+| --- | --- | --- |
+| |PORT | 3000 |
+| secret | SECRET | null |
+| webhook | WEBHOOK_PATH | / |
+| host | APIHOST | https://api.chatshipper.com |
+
+Running the test suite or the examples requires the `TOKEN` environment variable set as a valid API access token.
+
 ## Examples
 
-For examples see the [examples](https://github.com/chatshipper/chipchat/tree/master/examples) folder. To try any of the examples:
+For examples see the [examples](https://github.com/chatshipper/chipchat/tree/master/examples) folder. To try any of the examples, first set the `TOKEN` environment variable as a valid API access token:
 
-### Configure environment:
-
-    export APIHOST=https://api.chatshipper.com
     export TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6I...
 
 Then, try any of the examples:
