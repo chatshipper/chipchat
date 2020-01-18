@@ -11,7 +11,7 @@ require('dotenv').config({
     path: `${process.cwd()}${path.sep}.env`
 });
 
-const HOST = process.env.APIHOST;
+const HOST = process.env.APIHOST || 'https://api.chatshipper.com';
 
 const equal = assert.deepStrictEqual;
 
@@ -40,7 +40,7 @@ describe('Create a new bot', () => {
     });
     it('Should have secret set to false by default', () => {
         const bot = new Bot();
-        equal(bot.secret, false);
+        equal(bot.secret, process.env.SECRET || null);
     });
     it('Should secret set to a secret when passed via options', () => {
         const bot = new Bot({ secret: 'secrettest' });
@@ -103,7 +103,7 @@ describe('Create a new bot', () => {
     });
     it('Should have the webhook path set to / by default', () => {
         const bot = new Bot();
-        equal(bot.webhook, process.env.WEBHOOK_PATH);
+        equal(bot.webhook, process.env.WEBHOOK_PATH || '/');
     });
     it('Should have the webhook path set by setting the webhook option', () => {
         const bot = new Bot({ webhook: '/hi' });
