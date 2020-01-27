@@ -20,6 +20,16 @@ const bot = new ChipChat({
 });
 ```
 
+Admin-scoped access token have an expiration date set. To have ChipChat automatically refresh the access token when it is expired, provide your bot's `refresh token` and `email`:
+```javascript
+const bot = new ChipChat({
+  token: process.env.TOKEN,
+  refreshToken: process.env.REFRESH_TOKEN,
+  email: 'bot+6l5V87eY3@chatshipper.com'
+});
+```
+This will, when any request results in a "JWT expired" error, set a new access token on the instance, and retry the request. Subscribe to the `token` event to further process newly created access tokens.
+
 - Subscribe to messages sent by the user with the `bot.on()` and `bot.onText` methods, and reply using the `conversation` object:
 ```javascript
 bot.on('message', (message, conversation) => {
