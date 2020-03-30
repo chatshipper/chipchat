@@ -388,6 +388,7 @@ conversation.accept();
 Note: `conversation.accept()` is done automatically:
 - if the bot is not a conversation participant yet; and
 - when the first message to a consumer is sent (role: agent).
+
 It's best to have your bot explicitly join or accept the conversation (and leave afterwards) before talking to the consumer.
 
 #### `conversation.leave()`
