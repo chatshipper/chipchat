@@ -383,8 +383,12 @@ This is done automatically when the first message is sent, so this function call
 
 Accept a conversation - join it as a participant, set the conversation status to 'active' (if not already), and assume  responsibility for replying to the consumer. While a conversation is accepted (and thus active), no channel notifications are sent to channels, and active agents are expected to handle any inbound messages. Only consumer-facing bots need to use this method.
 ```javascript
-conversation.join();
+conversation.accept();
 ```
+Note: `conversation.accept()` is done automatically:
+- if the bot is not a conversation participant yet; and
+- when the first message to a consumer is sent (role: agent).
+It's best to have your bot explicitly join or accept the conversation (and leave afterwards) before talking to the consumer.
 
 #### `conversation.leave()`
 
