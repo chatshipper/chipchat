@@ -385,11 +385,7 @@ Accept a conversation - join it as a participant, set the conversation status to
 ```javascript
 conversation.accept();
 ```
-Note: `conversation.accept()` is done automatically:
-- if the bot is not a conversation participant yet; and
-- when the first message to a consumer is sent (role: agent).
-
-It's best to have your bot explicitly join or accept the conversation (and leave afterwards) before talking to the consumer.
+Note: `conversation.accept()` is done automatically if your bot sends a message to a consumer (message.role: agent), and is not a conversation participant yet. It's best to have your bot explicitly join or accept the conversation (and leave afterwards) before talking to the consumer.
 
 #### `conversation.leave()`
 
