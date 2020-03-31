@@ -59,7 +59,7 @@ if (conversation.status === 'queued'
   // with more than 5 messages and no results yet
 }
 ```
-See the Messages &gt; Conversations section in the [API Reference](https://api2.chatshipper.com/) for a full list of possible properties.
+See the Messages &gt; Conversations section in the [API Reference](https://api.chatshipper.com/) for a full list of possible properties.
 
 ### Conversation Methods
 
