@@ -108,7 +108,7 @@ The `message` param can be a string, an array, or an object:
 - If `message` is an array of messages, the array is passed as-is (and the messages processed in-order).
 - If `message` is an object, the message will be sent as a full ChatShipper message.
 
-See the [Messaging Guide](https://developers.chatshipper.com/docs/messaging-introduction) and [API Specs](https://api2.chatshipper.com/) for the properties of messages and other information related to messaging in ChatShipper.
+See the [Messaging Guide](https://developers.chatshipper.com/docs/messaging-introduction) and [API Specs](https://api.chatshipper.com/) for the properties of messages and other information related to messaging in ChatShipper.
 
 The conversation message sending methods like `conversation.say()` are a proxy for `bot.send()`, within the context of the conversation - the only difference is that when you use the methods from the `Conversation` instances, you don't have to specify the `conversationId`.
 
