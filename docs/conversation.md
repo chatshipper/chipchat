@@ -1,6 +1,6 @@
 ## Conversations
 
-A conversation context encapsulates all properties of a ChatShipper conversation, augmented with message sending methods. Conversations provide convenient ways to accept and leave conversations, send messages, ask questions and handle the user's answers. Conversations also provide methods to manage conversation state, so the interaction is always in context.
+Hallo Joost, A conversation context encapsulates all properties of a ChatShipper conversation, augmented with message sending methods. Conversations provide convenient ways to accept and leave conversations, send messages, ask questions and handle the user's answers. Conversations also provide methods to manage conversation state, so the interaction is always in context.
 
 ----
 
