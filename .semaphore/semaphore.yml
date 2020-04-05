@@ -6,6 +6,8 @@ agent:
     os_image: ubuntu1804
 blocks:
   - name: Test
+    secerts: 
+       - devToken
     task:
       jobs:
         - name: Test
