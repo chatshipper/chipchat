@@ -99,7 +99,7 @@ describe('Client tests', () => {
             request.resolvesArg(0);
             bot.send('convid', 'hi there').then((usedPayload) => {
                 equal(request.calledOnce, true);
-                equal(usedPayload.body.text, 'hi there');
+                equal(usedPayload.text, 'hi there');
             });
         });
         it('You can use say to a text direcly', async () => {
@@ -110,7 +110,7 @@ describe('Client tests', () => {
             bot.on('message', async (m, c) => {
                 equal(m.text, 'hi');
                 const usedPayload = await c.say('hi there bot');
-                equal(usedPayload.body.text, 'hi there bot');
+                equal(usedPayload.text, 'hi there bot');
                 equal(request.callCount, 1);
             });
             await bot.ingest(payload);
