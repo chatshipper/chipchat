@@ -8,6 +8,7 @@ const REFRESHTOKEN = process.env.REFRESHTOKEN;
 if (!TOKEN || !REFRESHTOKEN) {
     throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
 }
+const SDKADMINID = '5ee7372448d9940011151f42';
 const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
 const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, email: SDKADMINEMAIL };
 /*
@@ -34,7 +35,7 @@ describe('bot.ingest', () => {
             bot.on('error', (error) => {
                 assert.deepStrictEqual(error, { type: 'ingest', message: 'Invalid payload, missing event' });
             });
-            bot.ingest();
+            bot.ingest().catch(() => { });
         });
         it('should generate an error when the event is missing on the payload', () => {
             const bot = new Bot();
@@ -42,7 +43,7 @@ describe('bot.ingest', () => {
                 assert.deepStrictEqual(error, { type: 'ingest', message: 'Invalid payload, missing event' });
             });
             const payload = {};
-            bot.ingest(payload);
+            bot.ingest(payload).catch(() => { });
         });
         it('should generate an error when an message event arrives without a conversation in the payload', () => {
             const bot = new Bot();
@@ -50,7 +51,7 @@ describe('bot.ingest', () => {
                 assert.deepStrictEqual(error, { type: 'ingest', message: 'Invalid payload, missing conversation' });
             });
             const payload = { event: 'message.create.contact.chat' };
-            bot.ingest(payload);
+            bot.ingest(payload).catch(() => { });
         });
     });
     describe('active middleware', () => {
@@ -64,8 +65,8 @@ describe('bot.ingest', () => {
                 //should not get here, no errors were triggered
                 assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
             });
-            const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: USER, text: 'hi' } } };
-            bot.ingest(payload);
+            const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: SDKADMINID, text: 'hi' } } };
+            bot.ingest(payload).catch(() => { });
         });
         it('should not ignore message from self when ignoreSelf is disabled', () => {
             const bot = new Bot(Object.assign({}, DEFAULTAPIOPTIONS, { ignoreSelf: false }));
@@ -80,7 +81,7 @@ describe('bot.ingest', () => {
                 //should not have errors
                 assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
             });
-            bot.ingest(payload);
+            bot.ingest(payload).catch(() => { });
         });
         it('should ignore message from other bots (ignoreBotsMiddleware)', () => {
             const bot = new Bot(DEFAULTAPIOPTIONS);
@@ -93,7 +94,7 @@ describe('bot.ingest', () => {
                 assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
             });
             const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: '', role: 'bot', text: 'hi' } } };
-            bot.ingest(payload);
+            bot.ingest(payload).catch(() => { });
         });
         it('should not ignore message from other bots when ignoreBots is disabled', () => {
             const bot = new Bot(Object.assign({}, DEFAULTAPIOPTIONS, { ignoreSelf: false }));
@@ -108,7 +109,7 @@ describe('bot.ingest', () => {
                 //should not have errors
                 assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
             });
-            bot.ingest(payload);
+            bot.ingest(payload).catch(() => { });
         });
     });
     describe('valid messages', () => {
@@ -124,6 +125,6 @@ describe('bot.ingest', () => {
             //should not get here, no errors were triggered
             assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
         });
-        bot.ingest(payload);
+        bot.ingest(payload).catch(() => { });
     });
 });
