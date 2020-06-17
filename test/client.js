@@ -168,13 +168,16 @@ describe('Client tests', () => {
                         equal(true, false, `should not have error ${e}`);
                     });
                 });
-                equal(promise instanceof Promise, false, 'without callback should return a promise');
+                equal(promise instanceof Promise, false, 'with callback should not return a promise');
             });
         }).timeout(5000);
     });
-    describe('Using say on the context to add a message to a conversation', () => {
-        it('By using the Promise variant', async () => {
-            try {
+    describe.only('Using say on the context to add a message to a conversation', () => {
+        // for mocha to play nice with our .on events which are async
+        // we need to return a promise and resolve/reject it accordingly
+        // otherwise the tests will not fail properly
+        it('By using the Promise variant', () => {
+            return new Promise(async (resolve, reject) => {
                 const api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
                 }));
@@ -196,19 +199,22 @@ describe('Client tests', () => {
                         }
                     }
                 };
-                await api.on('message', async (m, c) => {
+                api.on('message', async (m, c) => {
                     equal(m.text, 'hello world');
                     const usedPayload = await c.say('hi there bot');
-                    equal(usedPayload.text, 'hi there bot');
+                    try {
+                        equal(usedPayload.text, 'hi there bot');
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
                     await api.conversations.delete(conv.id);
                 });
-                await api.ingest(event);
-            } catch (e) {
-                equal(true, false, `should not have error ${e}`);
-            }
-        }).timeout(5000);
-        it('By using the Callback variant', async () => {
-            try {
+                api.ingest(event);
+            });
+        });
+        it('By using the Callback variant', () => {
+            return new Promise(async (resolve, reject) => {
                 const api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
                 }));
@@ -230,18 +236,21 @@ describe('Client tests', () => {
                         }
                     }
                 };
-                await api.on('message', async (m, c) => {
+                api.on('message', async (m, c) => {
                     equal(m.text, 'hello world');
-                    c.say('hi there bot', async (err, body) => {
-                        equal(err, null, 'there should be no error');
-                        equal(body.text, 'hi there bot', 'should have valid body');
+                    const call = await c.say('hi there bot', async (err, usedPayload) => {
+                        try {
+                            equal(usedPayload.text, 'hi there bot');
+                            resolve();
+                        } catch (e) {
+                            reject(e);
+                        }
                         await api.conversations.delete(conv.id);
                     });
+                    equal(call instanceof Promise, false, 'with callback should not return a promise');
                 });
-                await api.ingest(event);
-            } catch (e) {
-                equal(true, false, `should not have error ${e}`);
-            }
+                api.ingest(event);
+            });
         }).timeout(5000);
     });
 });
