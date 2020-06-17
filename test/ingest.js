@@ -30,28 +30,31 @@ const bot = new Bot({
 */
 describe('bot.ingest', () => {
     describe('possible errors', () => {
-        it('should generate an error when the payload is empty', () => {
+        it('should generate an error when the payload is empty', (done) => {
             const bot = new Bot();
             bot.on('error', (error) => {
                 assert.deepStrictEqual(error, { type: 'ingest', message: 'Invalid payload, missing event' });
+                done();
             });
-            bot.ingest().catch(() => { });
+            bot.ingest();
         });
-        it('should generate an error when the event is missing on the payload', () => {
+        it('should generate an error when the event is missing on the payload', (done) => {
             const bot = new Bot();
             bot.on('error', (error) => {
                 assert.deepStrictEqual(error, { type: 'ingest', message: 'Invalid payload, missing event' });
+                done();
             });
             const payload = {};
-            bot.ingest(payload).catch(() => { });
+            bot.ingest(payload);
         });
-        it('should generate an error when an message event arrives without a conversation in the payload', () => {
+        it('should generate an error when an message event arrives without a conversation in the payload', (done) => {
             const bot = new Bot();
             bot.on('error', (error) => {
                 assert.deepStrictEqual(error, { type: 'ingest', message: 'Invalid payload, missing conversation' });
+                done();
             });
             const payload = { event: 'message.create.contact.chat' };
-            bot.ingest(payload).catch(() => { });
+            bot.ingest(payload);
         });
     });
     describe('active middleware', () => {
@@ -66,7 +69,7 @@ describe('bot.ingest', () => {
                 assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
             });
             const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: SDKADMINID, text: 'hi' } } };
-            bot.ingest(payload).catch(() => { });
+            bot.ingest(payload);
         });
         it('should not ignore message from self when ignoreSelf is disabled', () => {
             const bot = new Bot(Object.assign({}, DEFAULTAPIOPTIONS, { ignoreSelf: false }));
@@ -81,7 +84,7 @@ describe('bot.ingest', () => {
                 //should not have errors
                 assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
             });
-            bot.ingest(payload).catch(() => { });
+            bot.ingest(payload);
         });
         it('should ignore message from other bots (ignoreBotsMiddleware)', () => {
             const bot = new Bot(DEFAULTAPIOPTIONS);
@@ -94,7 +97,7 @@ describe('bot.ingest', () => {
                 assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
             });
             const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: '', role: 'bot', text: 'hi' } } };
-            bot.ingest(payload).catch(() => { });
+            bot.ingest(payload);
         });
         it('should not ignore message from other bots when ignoreBots is disabled', () => {
             const bot = new Bot(Object.assign({}, DEFAULTAPIOPTIONS, { ignoreSelf: false }));
@@ -109,7 +112,7 @@ describe('bot.ingest', () => {
                 //should not have errors
                 assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
             });
-            bot.ingest(payload).catch(() => { });
+            bot.ingest(payload);
         });
     });
     describe('valid messages', () => {
@@ -125,6 +128,6 @@ describe('bot.ingest', () => {
             //should not get here, no errors were triggered
             assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
         });
-        bot.ingest(payload).catch(() => { });
+        bot.ingest(payload);
     });
 });
