@@ -138,7 +138,7 @@ describe('Client tests', () => {
                 equal(true, false, `should not have error ${e}`);
             });
         });
-        it('You can send a text direcly to a conversation', async () => {
+        xit('You can send a text direcly to a conversation', async () => {
             try {
                 const api = new Api(DEFAULTAPIOPTIONS);
                 const payload = {
@@ -155,7 +155,7 @@ describe('Client tests', () => {
         });
     });
     describe('Using say on the context to add a message to a conversation', () => {
-        it('By using the Promise variant', async () => {
+        xit('By using the Promise variant', async () => {
             try {
                 const api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
@@ -189,7 +189,7 @@ describe('Client tests', () => {
                 equal(true, false, `should not have error ${e}`);
             }
         });
-        it('By using the Callback variant', async () => {
+        xit('By using the Callback variant', async () => {
             try {
                 const api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
