@@ -172,7 +172,7 @@ describe('Client tests', () => {
             });
         }).timeout(5000);
     });
-    describe.only('Using say on the context to add a message to a conversation', () => {
+    describe('Using say on the context to add a message to a conversation', () => {
         // for mocha to play nice with our .on events which are async
         // we need to return a promise and resolve/reject it accordingly
         // otherwise the tests will not fail properly
