@@ -52,92 +52,91 @@ describe('Client tests', () => {
         });
     });
     describe('Requesting Authentication', () => {
-        it('The API should have a valid token', () => {
+        it('The API should have a valid token', (done) => {
             const api = new Api(DEFAULTAPIOPTIONS);
-            return api.users.get(api.auth.user).then((user) => {
+            api.users.get(api.auth.user).then((user) => {
                 equal(user.id, SDKADMINID, 'should be the sdk admin user');
-            }).catch((e) => {
+            }).then(done).catch((e) => {
                 equal(true, false, 'should not trigger error', e);
             });
-        });
-        it('The API should refresh to a valid token', () => {
+        }).timeout(5000);
+        it('The API should refresh to a valid token', (done) => {
             const api = new Api({
                 token: INVALIDTOKEN,
                 refreshToken: REFRESHTOKEN,
                 email: SDKADMINEMAIL
             });
-            return api.users.get(SDKADMINID).then((user) => {
+            api.users.get(SDKADMINID).then((user) => {
                 equal(user.id, SDKADMINID, 'should be the sdk admin user');
-            }).catch((e) => {
+            }).then(done).catch((e) => {
                 equal(true, false, 'should not trigger error', e);
             });
-        });
-        it('The API should throw when refresh token is also invalid', () => {
+        }).timeout(5000);
+        it('The API should throw when refresh token is also invalid', (done) => {
             const api = new Api({
                 token: INVALIDTOKEN,
                 refreshToken: 'also invalid',
                 email: SDKADMINEMAIL
             });
-            return api.users.get(SDKADMINID).then(() => {
+            api.users.get(SDKADMINID).then(() => {
                 equal(true, false, 'should not be valid');
             }).catch((e) => {
-                equal(e.statusCode, 401, 'should not trigger error');
-                return null;
+                equal(e.statusCode, 401, 'should trigger a 401 error');
+                done();
             });
-        });
+        }).timeout(5000);
     });
     describe('Requesting recource endpoints', () => {
-        it('A bot\'s resource should return a promise, when no callback is provided', () => {
+        it('A bot\'s resource should return a promise, when no callback is provided', (done) => {
             const bot = new Api(DEFAULTAPIOPTIONS);
-            return bot.users.get(SDKAGENTID).then((user) => {
+            const call = bot.users.get(SDKAGENTID).then((user) => {
                 equal(user.id, SDKAGENTID);
-            }).catch((e) => {
+            }).then(done).catch((e) => {
                 equal(true, false, 'should not trigger error', e);
             });
-        });
-        it('A bot\'s resource should also return a promise when a callback is passed, but deal with callback as well', () => {
+            equal(call instanceof Promise, true, 'without callback should return a promise');
+        }).timeout(5000);
+        it('A bot\'s resource should not return a promise when a callback is passed', (done) => {
             const bot = new Api(DEFAULTAPIOPTIONS);
-            return bot.users.get(SDKAGENTID, (err, user) => {
+            const call = bot.users.get(SDKAGENTID, (err, user) => {
                 equal(err, null, 'callback should not have error');
                 equal(user.id, SDKAGENTID, 'callback should be the agent user');
-            }).then((user) => {
-                equal(user.id, SDKAGENTID, 'promise should be the agent user');
-            }).catch((e) => {
-                equal(true, false, 'should not trigger any error', e);
+                done();
             });
-        });
+            equal(call instanceof Promise, false, 'with callback should not return a promise');
+        }).timeout(5000);
     });
     describe('Creating a conversation', () => {
-        it('creating a conversation and deleting it again (with promises)', () => {
+        it('creating a conversation and deleting it again (with promise)', (done) => {
             const api = new Api(DEFAULTAPIOPTIONS);
             const payload = {
                 name: `SDK test nr ${testId}a`,
                 messages: [{ type: 'chat', text: 'hello world' }]
             };
-            return api.conversations.create(payload).then((conv) => {
+            api.conversations.create(payload).then((conv) => {
                 equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
                 equal(conv.name, `SDK test nr ${testId}a`, 'should have the correct name');
                 equal(conv.organization, SDKTESTORG, 'should have the correct organization');
                 return api.conversations.delete(conv.id);
-            }).catch((e) => {
+            }).then(done).catch((e) => {
                 equal(true, false, `should not have error ${e}`);
             });
-        });
-        it('creating a conversation and deleting it again (with callback)', () => {
+        }).timeout(5000);
+        it('creating a conversation and deleting it again (with callback)', (done) => {
             const api = new Api(DEFAULTAPIOPTIONS);
             const payload = {
                 name: `SDK test nr ${testId}b`,
                 messages: [{ type: 'chat', text: 'hello world' }]
             };
-            return api.conversations.create(payload, (err, conv) => {
+            const call = api.conversations.create(payload, (err, conv) => {
                 equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
                 equal(conv.name, `SDK test nr ${testId}b`, 'should have the correct name');
                 equal(conv.organization, SDKTESTORG, 'should have the correct organization');
-                return api.conversations.delete(conv.id);
-            }).catch((e) => {
-                equal(true, false, `should not have error ${e}`);
+                api.conversations.delete(conv.id);
+                done();
             });
-        });
+            equal(call instanceof Promise, false, 'with callback should not return a promise');
+        }).timeout(5000);
         it('You can send a text direcly to a conversation', async () => {
             try {
                 const api = new Api(DEFAULTAPIOPTIONS);
@@ -152,7 +151,7 @@ describe('Client tests', () => {
             } catch (e) {
                 equal(true, false, `should not have error ${e}`);
             }
-        });
+        }).timeout(5000);
     });
     describe('Using say on the context to add a message to a conversation', () => {
         it('By using the Promise variant', async () => {
@@ -188,7 +187,7 @@ describe('Client tests', () => {
             } catch (e) {
                 equal(true, false, `should not have error ${e}`);
             }
-        });
+        }).timeout(5000);
         it('By using the Callback variant', async () => {
             try {
                 const api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
@@ -224,6 +223,6 @@ describe('Client tests', () => {
             } catch (e) {
                 equal(true, false, `should not have error ${e}`);
             }
-        });
+        }).timeout(5000);
     });
 });
