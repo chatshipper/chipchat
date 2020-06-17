@@ -137,20 +137,39 @@ describe('Client tests', () => {
             });
             equal(call instanceof Promise, false, 'with callback should not return a promise');
         }).timeout(5000);
-        it('You can send a text direcly to a conversation', async () => {
-            try {
-                const api = new Api(DEFAULTAPIOPTIONS);
-                const payload = {
-                    name: `SDK test nr ${testId}c`,
-                    messages: [{ type: 'chat', text: 'first message' }]
-                };
-                const conv = await api.conversations.create(payload);
-                const message = await api.send(conv.id, 'second message');
-                equal(message.text, 'second message');
-                await api.conversations.delete(conv.id);
-            } catch (e) {
-                equal(true, false, `should not have error ${e}`);
-            }
+        it('You can send a text direcly to a conversation with a promise', (done) => {
+            const api = new Api(DEFAULTAPIOPTIONS);
+            const payload = {
+                name: `SDK test nr ${testId}c`,
+                messages: [{ type: 'chat', text: 'first message' }]
+            };
+            api.conversations.create(payload).then((conv) => {
+                const promise = api.send(conv.id, 'second message');
+
+                equal(promise instanceof Promise, true, 'without callback should return a promise');
+                promise.then((message) => {
+                    equal(message.text, 'second message');
+                }).then(() => api.conversations.delete(conv.id))
+                    .then(done).catch((e) => {
+                        equal(true, false, `should not have error ${e}`);
+                    });
+            });
+        }).timeout(5000);
+        it('You can send a text direcly to a conversation with a callback', (done) => {
+            const api = new Api(DEFAULTAPIOPTIONS);
+            const payload = {
+                name: `SDK test nr ${testId}c`,
+                messages: [{ type: 'chat', text: 'first message' }]
+            };
+            api.conversations.create(payload).then((conv) => {
+                const promise = api.send(conv.id, 'second message', (err, message) => {
+                    equal(message.text, 'second message');
+                    api.conversations.delete(conv.id).then(done).catch((e) => {
+                        equal(true, false, `should not have error ${e}`);
+                    });
+                });
+                equal(promise instanceof Promise, false, 'without callback should return a promise');
+            });
         }).timeout(5000);
     });
     describe('Using say on the context to add a message to a conversation', () => {
