@@ -57,9 +57,10 @@ describe('Client tests', () => {
             api.users.get(api.auth.user).then((user) => {
                 equal(user.id, SDKADMINID, 'should be the sdk admin user');
             }).then(done).catch((e) => {
+                console.log('-------', e);
                 equal(true, false, 'should not trigger error', e);
             });
-        }).timeout(5000);
+        });
         it('The API should refresh to a valid token', (done) => {
             const api = new Api({
                 token: INVALIDTOKEN,
@@ -71,7 +72,7 @@ describe('Client tests', () => {
             }).then(done).catch((e) => {
                 equal(true, false, 'should not trigger error', e);
             });
-        }).timeout(5000);
+        });
         it('The API should throw when refresh token is also invalid', (done) => {
             const api = new Api({
                 token: INVALIDTOKEN,
@@ -84,18 +85,19 @@ describe('Client tests', () => {
                 equal(e.statusCode, 401, 'should trigger a 401 error');
                 done();
             });
-        }).timeout(5000);
+        });
     });
     describe('Requesting recource endpoints', () => {
-        it('A bot\'s resource should return a promise, when no callback is provided', (done) => {
+        it.only('A bot\'s resource should return a promise, when no callback is provided', (done) => {
             const bot = new Api(DEFAULTAPIOPTIONS);
             const call = bot.users.get(SDKAGENTID).then((user) => {
                 equal(user.id, SDKAGENTID);
             }).then(done).catch((e) => {
+                console.log(e);
                 equal(true, false, 'should not trigger error', e);
             });
             equal(call instanceof Promise, true, 'without callback should return a promise');
-        }).timeout(5000);
+        });
         it('A bot\'s resource should not return a promise when a callback is passed', (done) => {
             const bot = new Api(DEFAULTAPIOPTIONS);
             const call = bot.users.get(SDKAGENTID, (err, user) => {
@@ -104,7 +106,7 @@ describe('Client tests', () => {
                 done();
             });
             equal(call instanceof Promise, false, 'with callback should not return a promise');
-        }).timeout(5000);
+        });
     });
     describe('Creating a conversation', () => {
         it('creating a conversation and deleting it again (with promise)', (done) => {
@@ -121,7 +123,7 @@ describe('Client tests', () => {
             }).then(done).catch((e) => {
                 equal(true, false, `should not have error ${e}`);
             });
-        }).timeout(5000);
+        });
         it('creating a conversation and deleting it again (with callback)', (done) => {
             const api = new Api(DEFAULTAPIOPTIONS);
             const payload = {
@@ -136,7 +138,7 @@ describe('Client tests', () => {
                 done();
             });
             equal(call instanceof Promise, false, 'with callback should not return a promise');
-        }).timeout(5000);
+        });
         it('You can send a text direcly to a conversation with a promise', (done) => {
             const api = new Api(DEFAULTAPIOPTIONS);
             const payload = {
@@ -154,7 +156,7 @@ describe('Client tests', () => {
                         equal(true, false, `should not have error ${e}`);
                     });
             });
-        }).timeout(5000);
+        });
         it('You can send a text direcly to a conversation with a callback', (done) => {
             const api = new Api(DEFAULTAPIOPTIONS);
             const payload = {
@@ -170,7 +172,7 @@ describe('Client tests', () => {
                 });
                 equal(promise instanceof Promise, false, 'with callback should not return a promise');
             });
-        }).timeout(5000);
+        });//.timeout(5000);
     });
     describe('Using say on the context to add a message to a conversation', () => {
         // for mocha to play nice with our .on events which are async
@@ -251,6 +253,6 @@ describe('Client tests', () => {
                 });
                 api.ingest(event);
             });
-        }).timeout(5000);
+        });
     });
 });

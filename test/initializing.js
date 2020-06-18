@@ -1,12 +1,20 @@
 /* eslint node/no-unsupported-features/es-syntax:0 */
 const mware = require('mware').default;
+const mock = require('mock-require');
+const sinon = require('sinon');
 const assert = require('assert');
 const path = require('path');
 const Bot = require('../lib/chipchat');
 
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjExMGRhZWU3MGJhYTQ4NWIxYjE2YmEiLCJvcmdhbml6YXRpb24iOiI1OTc4YmY0YjAyOTY0MDRlNmY5OTQ3ZTUiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJpYXQiOjE1NjQ1NjkzMDMsImV4cCI6MTU2NDY1NTcwM30.2q6isPDL5uMwtnyThVGN8Hq9UMqhzAkf72mZdVrSFgc';
-const USER = '5b110daee70baa485b1b16ba';
-const ORGANISATION = '5978bf4b0296404e6f9947e5';
+const SDKADMINID = '5ee7372448d9940011151f42';
+const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
+const TOKEN = process.env.TOKEN;
+const REFRESHTOKEN = process.env.REFRESHTOKEN;
+if (!TOKEN || !REFRESHTOKEN) {
+    throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
+}
+const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, email: SDKADMINEMAIL };
+const SDKTESTORG = '5ee7317effa8ca00117c990e';
 require('dotenv').config({
     path: `${process.cwd()}${path.sep}.env`
 });
@@ -14,6 +22,9 @@ require('dotenv').config({
 const HOST = process.env.APIHOST || 'https://api.chatshipper.com';
 
 const equal = assert.deepStrictEqual;
+
+sinon.restore();
+mock.stopAll();
 
 describe('Create a new bot', () => {
     it('should be a Bot', () => {
@@ -24,10 +35,10 @@ describe('Create a new bot', () => {
     it('should have a valid authentication object after initilizing with a correct token', () => {
         const bot = new Bot({ token: TOKEN });
         assert.deepStrictEqual(bot.auth, {
-            exp: 1564655703,
-            iat: 1564569303,
-            organization: ORGANISATION,
-            user: USER
+            exp: 1592299229,
+            iat: 1592212829,
+            organization: SDKTESTORG,
+            user: SDKADMINID
         });
     });
     it('should not have an authentication object after initilizing without token', () => {
@@ -36,6 +47,13 @@ describe('Create a new bot', () => {
     });
     it('should not have an authentication object after initilizing with incorrect token', () => {
         const bot = new Bot({ token: 'invalid' });
+        equal(bot.auth, undefined);
+    });
+    it('should not have an authentication object after initilizing with incorrect refresh token', () => {
+        const bot = new Bot({ token: REFRESHTOKEN });
+        bot.on('error', (error) => {
+            console.log(error);
+        });
         equal(bot.auth, undefined);
     });
     it('Should have secret set to false by default', () => {
@@ -119,5 +137,16 @@ describe('Create a new bot', () => {
     it('Should add a / to a path that does not start with a /', () => {
         const bot = new Bot({ webhook: 'hi/my/friend' });
         equal(bot.webhook, '/hi/my/friend');
+    });
+    // mischa here
+    xit('Can activate send middleware', (done) => {
+        const message = 'test';
+        const middleware = (bot, mess) => {
+            equal(mess);
+            done();
+        };
+        const bot = new Bot(Object.assign({}, DEFAULTAPIOPTIONS,
+            { middleware: { send: { middleware } } }));
+        bot.send('5eea21c7300bd70011a15154', message);
     });
 });

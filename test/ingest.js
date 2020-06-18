@@ -11,23 +11,6 @@ if (!TOKEN || !REFRESHTOKEN) {
 const SDKADMINID = '5ee7372448d9940011151f42';
 const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
 const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, email: SDKADMINEMAIL };
-/*
-const bot = new Bot({
-    token: TOKEN,
-    middleware: {
-        send: [
-            (b, payload, next) => { // eslint-disable-line
-                console.log(`------->send ${payload.text}`);
-                //next();
-            }
-        ],
-        receive: (bot, payload, next) => { // eslint-disable-line
-            console.log(`-------->receive ${payload.text}`);
-            next();
-        }
-    }
-});
-*/
 describe('bot.ingest', () => {
     describe('possible errors', () => {
         it('should generate an error when the payload is empty', (done) => {
