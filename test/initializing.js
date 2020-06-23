@@ -50,7 +50,7 @@ describe('Create a new bot', () => {
         equal(bot.auth, undefined);
     });
     it('should not have an authentication object after initilizing with incorrect refresh token', () => {
-        const bot = new Bot({ token: REFRESHTOKEN });
+        const bot = new Bot({ token: 'token' });
         bot.on('error', (error) => {
             console.log(error);
         });

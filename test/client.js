@@ -80,7 +80,7 @@ describe('Client tests', () => {
                 email: SDKADMINEMAIL
             });
             api.users.get(SDKADMINID).then(() => {
-                equal(true, false, 'should not be valid');
+                equal(true, false, 'should not get here without tokens');
             }).catch((e) => {
                 equal(e.statusCode, 401, 'should trigger a 401 error');
                 done();
@@ -88,12 +88,11 @@ describe('Client tests', () => {
         });
     });
     describe('Requesting recource endpoints', () => {
-        it.only('A bot\'s resource should return a promise, when no callback is provided', (done) => {
+        it('A bot\'s resource should return a promise, when no callback is provided', (done) => {
             const bot = new Api(DEFAULTAPIOPTIONS);
             const call = bot.users.get(SDKAGENTID).then((user) => {
                 equal(user.id, SDKAGENTID);
             }).then(done).catch((e) => {
-                console.log(e);
                 equal(true, false, 'should not trigger error', e);
             });
             equal(call instanceof Promise, true, 'without callback should return a promise');
