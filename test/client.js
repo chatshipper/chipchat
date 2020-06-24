@@ -6,6 +6,7 @@ const path = require('path');
 require('dotenv').config({
     path: `${process.cwd()}${path.sep}.env`
 });
+const got = require('got');
 
 const SDKADMINID = '5ee7372448d9940011151f42';
 const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
@@ -17,11 +18,25 @@ const SDKTESTORG = '5ee7317effa8ca00117c990e';
 mock.stopAll();
 const testId = Math.round(new Date().getTime() / 1000);
 
+let api;
 // no real world requests, we replace request-promise that chipchat uses for a stub
 //const request = sinon.stub();
-//mock('request-promise', request);
+const patchedGot = got.extend({
+    hooks: {
+        afterResponse: [
+            (response) => {
+                // we are emitting all requests so the tests can respond at exactly the right moment
+                // this is needed because many actions in the sdk happen in the background
+                api.emit(`test.request.${response.request.options.method}`, response.request.options, response.body.text);
+                return response;
+            }
+        ]
+    },
+    mutableDefaults: true
+});
+mock('got', patchedGot);
 
-const Api = require('../lib/chipchat');
+const Api = require('../lib/chipchat'); //eslint-disable-line
 
 const TOKEN = process.env.TOKEN;
 const REFRESHTOKEN = process.env.REFRESHTOKEN;
@@ -42,27 +57,27 @@ const equal = assert.deepStrictEqual;
 //use it.only to run one test
 //use describe.skip or xit to skip tests
 
+
 describe('Client tests', () => {
     describe('The API should have all the resources', () => {
         RESOURCES.forEach((resource) => {
             it(`${resource} has all its methods`, () => {
-                const api = new Api();
+                api = new Api();
                 equal(Object.keys(api[resource]).sort(), METHODS);
             });
         });
     });
     describe('Requesting Authentication', () => {
         it('The API should have a valid token', (done) => {
-            const api = new Api(DEFAULTAPIOPTIONS);
+            api = new Api(DEFAULTAPIOPTIONS);
             api.users.get(api.auth.user).then((user) => {
                 equal(user.id, SDKADMINID, 'should be the sdk admin user');
             }).then(done).catch((e) => {
-                console.log('-------', e);
                 equal(true, false, 'should not trigger error', e);
             });
         });
         it('The API should refresh to a valid token', (done) => {
-            const api = new Api({
+            api = new Api({
                 token: INVALIDTOKEN,
                 refreshToken: REFRESHTOKEN,
                 email: SDKADMINEMAIL
@@ -74,7 +89,7 @@ describe('Client tests', () => {
             });
         });
         it('The API should throw when refresh token is also invalid', (done) => {
-            const api = new Api({
+            api = new Api({
                 token: INVALIDTOKEN,
                 refreshToken: 'also invalid',
                 email: SDKADMINEMAIL
@@ -109,7 +124,7 @@ describe('Client tests', () => {
     });
     describe('Creating a conversation', () => {
         it('creating a conversation and deleting it again (with promise)', (done) => {
-            const api = new Api(DEFAULTAPIOPTIONS);
+            api = new Api(DEFAULTAPIOPTIONS);
             const payload = {
                 name: `SDK test nr ${testId}a`,
                 messages: [{ type: 'chat', text: 'hello world' }]
@@ -124,7 +139,7 @@ describe('Client tests', () => {
             });
         });
         it('creating a conversation and deleting it again (with callback)', (done) => {
-            const api = new Api(DEFAULTAPIOPTIONS);
+            api = new Api(DEFAULTAPIOPTIONS);
             const payload = {
                 name: `SDK test nr ${testId}b`,
                 messages: [{ type: 'chat', text: 'hello world' }]
@@ -139,7 +154,7 @@ describe('Client tests', () => {
             equal(call instanceof Promise, false, 'with callback should not return a promise');
         });
         it('You can send a text direcly to a conversation with a promise', (done) => {
-            const api = new Api(DEFAULTAPIOPTIONS);
+            api = new Api(DEFAULTAPIOPTIONS);
             const payload = {
                 name: `SDK test nr ${testId}c`,
                 messages: [{ type: 'chat', text: 'first message' }]
@@ -157,7 +172,7 @@ describe('Client tests', () => {
             });
         });
         it('You can send a text direcly to a conversation with a callback', (done) => {
-            const api = new Api(DEFAULTAPIOPTIONS);
+            api = new Api(DEFAULTAPIOPTIONS);
             const payload = {
                 name: `SDK test nr ${testId}c`,
                 messages: [{ type: 'chat', text: 'first message' }]
@@ -179,7 +194,7 @@ describe('Client tests', () => {
         // otherwise the tests will not fail properly
         it('By using the Promise variant', () => {
             return new Promise(async (resolve, reject) => {
-                const api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
                 }));
                 const payload = {
@@ -216,7 +231,7 @@ describe('Client tests', () => {
         });
         it('By using the Callback variant', () => {
             return new Promise(async (resolve, reject) => {
-                const api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
                 }));
                 const payload = {
@@ -251,6 +266,93 @@ describe('Client tests', () => {
                     equal(call instanceof Promise, false, 'with callback should not return a promise');
                 });
                 api.ingest(event);
+            });
+        });
+    });
+    describe('Using ask on the context in a conversation', () => {
+        // for mocha to play nice with our .on events which are async
+        // we need to return a promise and resolve/reject it accordingly
+        // otherwise the tests will not fail properly
+        it('By using the Promise variant', () => {
+            return new Promise(async (resolve, reject) => {
+                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                    ignoreSelf: false
+                }));
+                const payload = {
+                    name: `SDK test nr ${testId}c`,
+                    messages: [{ type: 'chat', text: 'first message' }]
+                };
+                const conv = await api.conversations.create(payload);
+                const context = await api.conversation(conv.id);
+                const event = { event: 'message.create.contact.chat',
+                    data: {
+                        conversation: {
+                            id: conv.id,
+                            organization: conv.organization
+                        },
+                        message: {
+                            conversation: conv.id,
+                            type: 'chat',
+                            role: 'contact',
+                            text: 'mischa'
+                        }
+                    }
+                };
+                // answer the context.ask below after /set _asked is finished
+                api.on('test.request.POST', (request, json) => {
+                    if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
+                        setTimeout(api.ingest.bind(api, event), 0); //next tick
+                    }
+                });
+                const call = context.ask('what is your name?');
+                equal(call instanceof Promise, true, 'Should return a promise');
+                call.then((m) => {
+                    equal(m.text, 'mischa');
+                    resolve();
+                }).catch((e) => {
+                    equal(true, false, `should not have error ${e}`);
+                    reject(e);
+                }).finally(api.conversations.delete.bind(this, conv.id));
+            });
+        });
+        it('By using the Callback variant', () => {
+            return new Promise(async (resolve) => {
+                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                    ignoreSelf: false
+                }));
+                const payload = {
+                    name: `SDK test nr ${testId}c`,
+                    messages: [{ type: 'chat', text: 'first message' }]
+                };
+                const conv = await api.conversations.create(payload);
+                const context = await api.conversation(conv.id);
+                const event = { event: 'message.create.contact.chat',
+                    data: {
+                        conversation: {
+                            id: conv.id,
+                            organization: conv.organization
+                        },
+                        message: {
+                            conversation: conv.id,
+                            type: 'chat',
+                            role: 'contact',
+                            text: 'mischa'
+                        }
+                    }
+                };
+                // answer the context.ask below after /set _asked is finished
+                api.on('test.request.POST', (request, json) => {
+                    if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
+                        setTimeout(api.ingest.bind(api, event), 0); //next tick
+                    }
+                });
+                const call = context.ask('what is your name?', (m, c) => {
+                    equal(c.id, conv.id, 'Should have the correct conv id');
+                    equal(m.text, 'mischa');
+                    api.conversations.delete(conv.id);
+                    resolve();
+                });
+                equal(call instanceof Promise, false, 'Should not return a promise');
             });
         });
     });
