@@ -288,7 +288,8 @@ describe('Client tests', () => {
                     data: {
                         conversation: {
                             id: conv.id,
-                            organization: conv.organization
+                            organization: conv.organization,
+                            meta: {}
                         },
                         message: {
                             conversation: conv.id,
@@ -299,8 +300,10 @@ describe('Client tests', () => {
                     }
                 };
                 // answer the context.ask below after /set _asked is finished
-                api.on('test.request.POST', (request, json) => {
+                api.on('test.request.POST', async (request, json) => {
                     if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
+                        const newContext = await api.conversation(conv.id);
+                        event.data.conversation.meta[`_asked${api.auth.user}`] = newContext.meta[`_asked${api.auth.user}`].toString();
                         setTimeout(api.ingest.bind(api, event), 0); //next tick
                     }
                 });
@@ -330,7 +333,8 @@ describe('Client tests', () => {
                     data: {
                         conversation: {
                             id: conv.id,
-                            organization: conv.organization
+                            organization: conv.organization,
+                            meta: {}
                         },
                         message: {
                             conversation: conv.id,
@@ -341,8 +345,10 @@ describe('Client tests', () => {
                     }
                 };
                 // answer the context.ask below after /set _asked is finished
-                api.on('test.request.POST', (request, json) => {
+                api.on('test.request.POST', async (request, json) => {
                     if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
+                        const newContext = await api.conversation(conv.id);
+                        event.data.conversation.meta[`_asked${api.auth.user}`] = newContext.meta[`_asked${api.auth.user}`].toString();
                         setTimeout(api.ingest.bind(api, event), 0); //next tick
                     }
                 });
