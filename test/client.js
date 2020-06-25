@@ -102,8 +102,8 @@ describe('Client tests', () => {
     });
     describe('Requesting recource endpoints', () => {
         it('A bot\'s resource should return a promise, when no callback is provided', (done) => {
-            bot = new Api(DEFAULTAPIOPTIONS);
-            const call = bot.users.get(SDKAGENTID).then((user) => {
+            api = new Api(DEFAULTAPIOPTIONS);
+            const call = api.users.get(SDKAGENTID).then((user) => {
                 equal(user.id, SDKAGENTID);
             }).then(done).catch((e) => {
                 equal(true, false, 'should not trigger error', e);
@@ -111,8 +111,8 @@ describe('Client tests', () => {
             equal(call instanceof Promise, true, 'without callback should return a promise');
         });
         it('A bot\'s resource should not return a promise when a callback is passed', (done) => {
-            bot = new Api(DEFAULTAPIOPTIONS);
-            const call = bot.users.get(SDKAGENTID, (err, user) => {
+            api = new Api(DEFAULTAPIOPTIONS);
+            const call = api.users.get(SDKAGENTID, (err, user) => {
                 equal(err, null, 'callback should not have error');
                 equal(user.id, SDKAGENTID, 'callback should be the agent user');
                 done();
