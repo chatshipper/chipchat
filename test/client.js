@@ -1,7 +1,6 @@
 /* eslint no-plusplus:0 */
 const assert = require('assert');
 const mock = require('mock-require');
-//const sinon = require('sinon');
 const path = require('path');
 require('dotenv').config({
     path: `${process.cwd()}${path.sep}.env`
@@ -13,21 +12,20 @@ const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
 const SDKAGENTID = '5ee731deb306f000111815db';
 const INVALIDTOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjQzMGVmNDEwYjdjYjBjYzI1ODAxODMiLCJvcmdhbml6YXRpb24iOiI1NjNmODA5ODM5NmM1MGRmNzc4NTdiNmQiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJncmFudF90eXBlIjoiYWNjZXNzX3Rva2VuIiwiaWF0IjoxNTkxODYwMzQzLCJleHAiOjE1OTE5NDY3NDN9.mdmn1Rg1rUxz5Hbe11mKsYzgHHVD2tqNeygJ1Qgsf-w';
 const SDKTESTORG = '5ee7317effa8ca00117c990e';
-//multi file reset
-//sinon.restore();
 mock.stopAll();
 const testId = Math.round(new Date().getTime() / 1000);
 
 let api;
-// no real world requests, we replace request-promise that chipchat uses for a stub
-//const request = sinon.stub();
+let bot;
 const patchedGot = got.extend({
     hooks: {
         afterResponse: [
             (response) => {
                 // we are emitting all requests so the tests can respond at exactly the right moment
                 // this is needed because many actions in the sdk happen in the background
-                api.emit(`test.request.${response.request.options.method}`, response.request.options, response.body.text);
+                [api, bot].forEach((o) => {
+                    if (o) o.emit(`test.request.${response.request.options.method}`, response.request.options, response.body.text);
+                });
                 return response;
             }
         ]
@@ -104,7 +102,7 @@ describe('Client tests', () => {
     });
     describe('Requesting recource endpoints', () => {
         it('A bot\'s resource should return a promise, when no callback is provided', (done) => {
-            const bot = new Api(DEFAULTAPIOPTIONS);
+            bot = new Api(DEFAULTAPIOPTIONS);
             const call = bot.users.get(SDKAGENTID).then((user) => {
                 equal(user.id, SDKAGENTID);
             }).then(done).catch((e) => {
@@ -113,7 +111,7 @@ describe('Client tests', () => {
             equal(call instanceof Promise, true, 'without callback should return a promise');
         });
         it('A bot\'s resource should not return a promise when a callback is passed', (done) => {
-            const bot = new Api(DEFAULTAPIOPTIONS);
+            bot = new Api(DEFAULTAPIOPTIONS);
             const call = bot.users.get(SDKAGENTID, (err, user) => {
                 equal(err, null, 'callback should not have error');
                 equal(user.id, SDKAGENTID, 'callback should be the agent user');

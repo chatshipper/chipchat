@@ -1,9 +1,11 @@
 /* eslint node/no-unsupported-features/es-syntax:0 */
 const mware = require('mware').default;
 const mock = require('mock-require');
-const sinon = require('sinon');
 const assert = require('assert');
 const path = require('path');
+
+mock.stopAll();
+
 const Bot = require('../lib/chipchat');
 
 const SDKADMINID = '5ee7372448d9940011151f42';
@@ -22,9 +24,6 @@ require('dotenv').config({
 const HOST = process.env.APIHOST || 'https://api.chatshipper.com';
 
 const equal = assert.deepStrictEqual;
-
-sinon.restore();
-mock.stopAll();
 
 describe('Create a new bot', () => {
     it('should be a Bot', () => {
@@ -138,15 +137,42 @@ describe('Create a new bot', () => {
         const bot = new Bot({ webhook: 'hi/my/friend' });
         equal(bot.webhook, '/hi/my/friend');
     });
-    // mischa here
-    xit('Can activate send middleware', (done) => {
+    it('Can activate send middleware', (done) => {
         const message = 'test';
         const middleware = (bot, mess) => {
-            equal(mess);
+            equal(mess, { conversation: 'fakeconv', text: message });
             done();
         };
-        const bot = new Bot(Object.assign({}, DEFAULTAPIOPTIONS,
-            { middleware: { send: { middleware } } }));
-        bot.send('5eea21c7300bd70011a15154', message);
+        const bot = new Bot(Object.assign({ ignoreBots: false, ignoreSelf: false },
+            DEFAULTAPIOPTIONS,
+            { middleware: { send: middleware } }));
+        // we can use fake conv id as we are canceling in the middleware
+        bot.send('fakeconv', message, () => { });
+    });
+    it('Can activate receive middleware', (done) => {
+        // we can use fake conv id as we are canceling in the middleware
+        const event = { event: 'message.create.contact.chat',
+            data: {
+                conversation: {
+                    id: 'fakeid',
+                    organization: 'fakeorg',
+                    meta: {}
+                },
+                message: {
+                    conversation: 'fakeid',
+                    type: 'chat',
+                    role: 'contact',
+                    text: 'mischa'
+                }
+            }
+        };
+        const middleware = (bot, mess) => {
+            equal(mess, event);
+            done();
+        };
+        const bot = new Bot(Object.assign({ ignoreBots: false, ignoreSelf: false },
+            DEFAULTAPIOPTIONS,
+            { middleware: { receive: middleware } }));
+        bot.ingest(event);
     });
 });
