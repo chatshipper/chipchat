@@ -1,26 +1,12 @@
 const assert = require('assert');
 const Bot = require('../lib/chipchat');
 
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjExMGRhZWU3MGJhYTQ4NWIxYjE2YmEiLCJvcmdhbml6YXRpb24iOiI1OTc4YmY0YjAyOTY0MDRlNmY5OTQ3ZTUiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJpYXQiOjE1NjQ1NjkzMDMsImV4cCI6MTU2NDY1NTcwM30.2q6isPDL5uMwtnyThVGN8Hq9UMqhzAkf72mZdVrSFgc';
-const USER = '5b110daee70baa485b1b16ba';
+const TOKEN = process.env.CS_TOKEN;
+const USER = process.env.CS_USER;
+const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
 
-/*
-const bot = new Bot({
-    token: TOKEN,
-    middleware: {
-        send: [
-            (b, payload, next) => { // eslint-disable-line
-                console.log(`------->send ${payload.text}`);
-                //next();
-            }
-        ],
-        receive: (bot, payload, next) => { // eslint-disable-line
-            console.log(`-------->receive ${payload.text}`);
-            next();
-        }
-    }
-});
-*/
+assert.ok((TOKEN && USER && HOST));
+
 describe('bot.ingest', () => {
     describe('possible errors', () => {
         it('should generate an error when the payload is empty', () => {
@@ -106,7 +92,7 @@ describe('bot.ingest', () => {
         });
     });
     describe('valid messages', () => {
-        const bot = new Bot({ token: TOKEN });
+        const bot = new Bot({ token: TOKEN, host : HOST});
         const payload = { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: '', role: 'agent', text: 'hi' } } };
         bot.on('message', (message, conversation) => {
             //should receive the message

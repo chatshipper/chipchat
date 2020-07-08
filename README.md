@@ -1,5 +1,10 @@
 **ChipChat** is the ChatShipper Node.js SDK that helps you manage ChatShipper resources and build chat bots. This library provides convenient access to the ChatShipper API from applications written in server-side JavaScript.
 
+## Build status
+
+ - **master** ![Master branch build status](https://chatshipper.semaphoreci.com/badges/chipchat/branches/master.svg)
+ - **development** ![Development branch build status](https://chatshipper.semaphoreci.com/badges/chipchat/branches/development.svg)
+
 ## Installation
 
 Install the package with:
