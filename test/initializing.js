@@ -28,12 +28,8 @@ describe('Create a new bot', () => {
 
     it('should have a valid authentication object after initilizing with a correct token', () => {
         const bot = new Bot({ token: TOKEN });
-        assert.deepStrictEqual(bot.auth, {
-            exp: 1564655703,
-            iat: 1564569303,
-            organization: ORGANIZATION,
-            user: USER
-        });
+        equal(bot.auth.organization, ORGANIZATION, 'Bad organization token');
+        equal(bot.auth.user, USER, 'Bad user token');
     });
     it('should not have an authentication object after initilizing without token', () => {
         const bot = new Bot();
@@ -51,7 +47,7 @@ describe('Create a new bot', () => {
         const bot = new Bot({ secret: 'secrettest' });
         equal(bot.secret, 'secrettest');
     });
-    it('Should secret set by setting the environment SECRET', () => {
+7    it('Should secret set by setting the environment SECRET', () => {
         const restore = { ...process.env };
         process.env.SECRET = 'secrettest';
         const bot = new Bot();
