@@ -47,7 +47,7 @@ describe('Create a new bot', () => {
         const bot = new Bot({ secret: 'secrettest' });
         equal(bot.secret, 'secrettest');
     });
-7    it('Should secret set by setting the environment SECRET', () => {
+    it('Should secret set by setting the environment SECRET', () => {
         const restore = { ...process.env };
         process.env.SECRET = 'secrettest';
         const bot = new Bot();
