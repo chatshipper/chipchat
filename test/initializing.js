@@ -4,14 +4,19 @@ const assert = require('assert');
 const path = require('path');
 const Bot = require('../lib/chipchat');
 
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjExMGRhZWU3MGJhYTQ4NWIxYjE2YmEiLCJvcmdhbml6YXRpb24iOiI1OTc4YmY0YjAyOTY0MDRlNmY5OTQ3ZTUiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJpYXQiOjE1NjQ1NjkzMDMsImV4cCI6MTU2NDY1NTcwM30.2q6isPDL5uMwtnyThVGN8Hq9UMqhzAkf72mZdVrSFgc';
-const USER = '5b110daee70baa485b1b16ba';
-const ORGANISATION = '5978bf4b0296404e6f9947e5';
+const TOKEN = process.env.CS_TOKEN;
+const USER = process.env.CS_USER;
+const ORGANIZATION = process.env.CS_ORGANIZATION;
+const SECRET = process.env.CS_SECRET;
+const WEBHOOK_PATH = process.env.CS_WEBHOOK_PATH || '/';
+
 require('dotenv').config({
     path: `${process.cwd()}${path.sep}.env`
 });
 
-const HOST = process.env.APIHOST || 'https://api.chatshipper.com';
+const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
+
+assert.ok(TOKEN && USER && ORGANIZATION && HOST);
 
 const equal = assert.deepStrictEqual;
 
@@ -26,7 +31,7 @@ describe('Create a new bot', () => {
         assert.deepStrictEqual(bot.auth, {
             exp: 1564655703,
             iat: 1564569303,
-            organization: ORGANISATION,
+            organization: ORGANIZATION,
             user: USER
         });
     });
@@ -40,7 +45,7 @@ describe('Create a new bot', () => {
     });
     it('Should have secret set to false by default', () => {
         const bot = new Bot();
-        equal(bot.secret, process.env.SECRET || null);
+        equal(bot.secret, SECRET || null);
     });
     it('Should secret set to a secret when passed via options', () => {
         const bot = new Bot({ secret: 'secrettest' });
@@ -103,7 +108,7 @@ describe('Create a new bot', () => {
     });
     it('Should have the webhook path set to / by default', () => {
         const bot = new Bot();
-        equal(bot.webhook, process.env.WEBHOOK_PATH || '/');
+        equal(bot.webhook, WEBHOOK_PATH);
     });
     it('Should have the webhook path set by setting the webhook option', () => {
         const bot = new Bot({ webhook: '/hi' });
