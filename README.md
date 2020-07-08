@@ -2,8 +2,8 @@
 
 ## Build status
 
-**master** ![Master branch build status](https://chatshipper.semaphoreci.com/badges/chipchat/branches/master.svg)
-**development** ![Development branch build status](https://chatshipper.semaphoreci.com/badges/chipchat/branches/development.svg)
+ - **master** ![Master branch build status](https://chatshipper.semaphoreci.com/badges/chipchat/branches/master.svg)
+ - **development** ![Development branch build status](https://chatshipper.semaphoreci.com/badges/chipchat/branches/development.svg)
 
 ## Installation
 
