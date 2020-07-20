@@ -19,8 +19,3 @@ blocks:
             - cache store
             - npm run build --if-present
             - npm test
-      env_vars:
-        - name: REFRESHTOKEN
-          value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZWU3MzcyNDQ4ZDk5NDAwMTExNTFmNDIiLCJvcmdhbml6YXRpb24iOiI1ZWU3MzE3ZWZmYThjYTAwMTE3Yzk5MGUiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJncmFudF90eXBlIjoicmVmcmVzaF90b2tlbiIsImlhdCI6MTU5NTIxMTEwNX0.UCXq01muuiprkUaeAjhotGhAg6LBxGILd_3qmLGWNFY
-        - name: TOKEN
-          value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZWU3MzcyNDQ4ZDk5NDAwMTExNTFmNDIiLCJvcmdhbml6YXRpb24iOiI1ZWU3MzE3ZWZmYThjYTAwMTE3Yzk5MGUiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJncmFudF90eXBlIjoiYWNjZXNzX3Rva2VuIiwiaWF0IjoxNTk1MjExMTA1fQ.2gn-I57NvSzmWV3NSW8kRUGX9zpC3ax6Uq6mKHqEFyk
