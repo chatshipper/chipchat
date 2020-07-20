@@ -8,20 +8,24 @@ mock.stopAll();
 
 const Bot = require('../lib/chipchat');
 
-const SDKADMINID = '5ee7372448d9940011151f42';
-const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
-const TOKEN = process.env.TOKEN;
-const REFRESHTOKEN = process.env.REFRESHTOKEN;
+const TOKEN = process.env.CS_TOKEN;
+const REFRESHTOKEN = process.env.CS_REFRESHTOKEN;
+const USER = process.env.CS_USER;
+const ORGANIZATION = process.env.CS_ORGANIZATION;
+const SECRET = process.env.CS_SECRET;
+const WEBHOOK_PATH = process.env.CS_WEBHOOK_PATH || '/';
+const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
+
 if (!TOKEN || !REFRESHTOKEN) {
     throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
 }
-const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, email: SDKADMINEMAIL };
-const SDKTESTORG = '5ee7317effa8ca00117c990e';
+const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN };
+
 require('dotenv').config({
     path: `${process.cwd()}${path.sep}.env`
 });
 
-const HOST = process.env.APIHOST || 'https://api.chatshipper.com';
+assert.ok(TOKEN && USER && ORGANIZATION && HOST);
 
 const equal = assert.deepStrictEqual;
 
@@ -33,12 +37,8 @@ describe('Create a new bot', () => {
 
     it('should have a valid authentication object after initilizing with a correct token', () => {
         const bot = new Bot({ token: TOKEN });
-        assert.deepStrictEqual(bot.auth, {
-            exp: 1592299229,
-            iat: 1592212829,
-            organization: SDKTESTORG,
-            user: SDKADMINID
-        });
+        equal(bot.auth.organization, ORGANIZATION, 'Bad organization token');
+        equal(bot.auth.user, USER, 'Bad user token');
     });
     it('should not have an authentication object after initilizing without token', () => {
         const bot = new Bot();
@@ -57,7 +57,7 @@ describe('Create a new bot', () => {
     });
     it('Should have secret set to false by default', () => {
         const bot = new Bot();
-        equal(bot.secret, process.env.SECRET || null);
+        equal(bot.secret, SECRET || null);
     });
     it('Should secret set to a secret when passed via options', () => {
         const bot = new Bot({ secret: 'secrettest' });
@@ -120,7 +120,7 @@ describe('Create a new bot', () => {
     });
     it('Should have the webhook path set to / by default', () => {
         const bot = new Bot();
-        equal(bot.webhook, process.env.WEBHOOK_PATH || '/');
+        equal(bot.webhook, WEBHOOK_PATH);
     });
     it('Should have the webhook path set by setting the webhook option', () => {
         const bot = new Bot({ webhook: '/hi' });

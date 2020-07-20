@@ -7,11 +7,18 @@ require('dotenv').config({
 });
 const got = require('got');
 
+const TOKEN = process.env.CS_TOKEN;
+const REFRESHTOKEN = process.env.CS_REFRESHTOKEN;
+if (!TOKEN || !REFRESHTOKEN) {
+    throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
+}
+
 const SDKADMINID = '5ee7372448d9940011151f42';
 const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
 const SDKAGENTID = '5ee731deb306f000111815db';
 const INVALIDTOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjQzMGVmNDEwYjdjYjBjYzI1ODAxODMiLCJvcmdhbml6YXRpb24iOiI1NjNmODA5ODM5NmM1MGRmNzc4NTdiNmQiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJncmFudF90eXBlIjoiYWNjZXNzX3Rva2VuIiwiaWF0IjoxNTkxODYwMzQzLCJleHAiOjE1OTE5NDY3NDN9.mdmn1Rg1rUxz5Hbe11mKsYzgHHVD2tqNeygJ1Qgsf-w';
 const SDKTESTORG = '5ee7317effa8ca00117c990e';
+
 mock.stopAll();
 const testId = Math.round(new Date().getTime() / 1000);
 
@@ -35,12 +42,6 @@ const patchedGot = got.extend({
 mock('got', patchedGot);
 
 const Api = require('../lib/chipchat'); //eslint-disable-line
-
-const TOKEN = process.env.TOKEN;
-const REFRESHTOKEN = process.env.REFRESHTOKEN;
-if (!TOKEN || !REFRESHTOKEN) {
-    throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
-}
 
 const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, email: SDKADMINEMAIL };
 const METHODS = ['create', 'delete', 'get', 'list', 'update'];
