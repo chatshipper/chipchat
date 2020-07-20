@@ -9,7 +9,7 @@
   "scripts": {
     "jsdoc": "jsdoc -P ./package.json -r lib/ -d jsdoc/",
     "doc": "jsdoc2md lib/chipchat.js > docs/api.md && jsdoc2md lib/server.js >> docs/api.md && jsdoc2md lib/client.js >> docs/api.md",
-    "test": "mocha",
+    "test": "mocha --timeout 3000",
     "test:coverage": "nyc mocha",
     "test:coverage:html": "npx nyc report --reporter=html",
     "test:watch": "npm test -- --watch",
@@ -48,10 +48,9 @@
     "debug": "^4.1.0",
     "eventemitter2": "^5.0.1",
     "express": "^4.17.1",
+    "got": "^11.3.0",
     "jsonwebtoken": "^8.2.1",
-    "mware": "^1.0.1",
-    "request": "^2.88.2",
-    "request-promise": "^4.2.5"
+    "mware": "^1.0.1"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",

@@ -1,20 +1,29 @@
 /* eslint node/no-unsupported-features/es-syntax:0 */
 const mware = require('mware').default;
+const mock = require('mock-require');
 const assert = require('assert');
 const path = require('path');
+
+mock.stopAll();
+
 const Bot = require('../lib/chipchat');
 
 const TOKEN = process.env.CS_TOKEN;
-const USER = process.env.CS_USER;
-const ORGANIZATION = process.env.CS_ORGANIZATION;
+const REFRESHTOKEN = process.env.CS_REFRESHTOKEN;
+const USER = process.env.CS_USER || '5ee731deb306f000111815db';
+const ORGANIZATION = process.env.CS_ORGANIZATION || '5ee7317effa8ca00117c990e';
 const SECRET = process.env.CS_SECRET;
 const WEBHOOK_PATH = process.env.CS_WEBHOOK_PATH || '/';
+const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
+
+if (!TOKEN || !REFRESHTOKEN) {
+    throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
+}
+const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN };
 
 require('dotenv').config({
     path: `${process.cwd()}${path.sep}.env`
 });
-
-const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
 
 assert.ok(TOKEN && USER && ORGANIZATION && HOST);
 
@@ -37,6 +46,13 @@ describe('Create a new bot', () => {
     });
     it('should not have an authentication object after initilizing with incorrect token', () => {
         const bot = new Bot({ token: 'invalid' });
+        equal(bot.auth, undefined);
+    });
+    it('should not have an authentication object after initilizing with incorrect refresh token', () => {
+        const bot = new Bot({ token: 'token' });
+        bot.on('error', (error) => {
+            console.log(error);
+        });
         equal(bot.auth, undefined);
     });
     it('Should have secret set to false by default', () => {
@@ -120,5 +136,43 @@ describe('Create a new bot', () => {
     it('Should add a / to a path that does not start with a /', () => {
         const bot = new Bot({ webhook: 'hi/my/friend' });
         equal(bot.webhook, '/hi/my/friend');
+    });
+    it('Can activate send middleware', (done) => {
+        const message = 'test';
+        const middleware = (bot, mess) => {
+            equal(mess, { conversation: 'fakeconv', text: message });
+            done();
+        };
+        const bot = new Bot(Object.assign({ ignoreBots: false, ignoreSelf: false },
+            DEFAULTAPIOPTIONS,
+            { middleware: { send: middleware } }));
+        // we can use fake conv id as we are canceling in the middleware
+        bot.send('fakeconv', message, () => { });
+    });
+    it('Can activate receive middleware', (done) => {
+        // we can use fake conv id as we are canceling in the middleware
+        const event = { event: 'message.create.contact.chat',
+            data: {
+                conversation: {
+                    id: 'fakeid',
+                    organization: 'fakeorg',
+                    meta: {}
+                },
+                message: {
+                    conversation: 'fakeid',
+                    type: 'chat',
+                    role: 'contact',
+                    text: 'mischa'
+                }
+            }
+        };
+        const middleware = (bot, mess) => {
+            equal(mess, event);
+            done();
+        };
+        const bot = new Bot(Object.assign({ ignoreBots: false, ignoreSelf: false },
+            DEFAULTAPIOPTIONS,
+            { middleware: { receive: middleware } }));
+        bot.ingest(event);
     });
 });
