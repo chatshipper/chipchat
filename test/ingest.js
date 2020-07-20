@@ -3,8 +3,8 @@ const Bot = require('../lib/chipchat');
 
 const TOKEN = process.env.CS_TOKEN;
 const REFRESHTOKEN = process.env.CS_REFRESHTOKEN;
-const USER = process.env.CS_USER;
-const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
+const USER = process.env.CS_USER || '5ee731deb306f000111815db';
+//const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
 if (!TOKEN || !REFRESHTOKEN) {
     throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
 }
@@ -14,7 +14,7 @@ const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
 const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, email: SDKADMINEMAIL };
 let bot;
 
-assert.ok((TOKEN && USER && HOST));
+assert.ok((TOKEN && USER));
 
 describe('bot.ingest', () => {
     describe('possible errors', () => {

@@ -10,8 +10,8 @@ const Bot = require('../lib/chipchat');
 
 const TOKEN = process.env.CS_TOKEN;
 const REFRESHTOKEN = process.env.CS_REFRESHTOKEN;
-const USER = process.env.CS_USER;
-const ORGANIZATION = process.env.CS_ORGANIZATION;
+const USER = process.env.CS_USER || '5ee731deb306f000111815db';
+const ORGANIZATION = process.env.CS_ORGANIZATION || '5ee7317effa8ca00117c990e';
 const SECRET = process.env.CS_SECRET;
 const WEBHOOK_PATH = process.env.CS_WEBHOOK_PATH || '/';
 const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
