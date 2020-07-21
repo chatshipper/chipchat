@@ -2,8 +2,10 @@
 const assert = require('assert');
 const mock = require('mock-require');
 const path = require('path');
+
+const file = `${process.cwd()}${path.sep}.env`;
 require('dotenv').config({
-    path: `${process.cwd()}${path.sep}.env`
+    path: file
 });
 const got = require('got');
 
@@ -12,15 +14,20 @@ const REFRESHTOKEN = process.env.CS_REFRESHTOKEN;
 if (!TOKEN || !REFRESHTOKEN) {
     throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
 }
-
-const SDKADMINID = '5ee7372448d9940011151f42';
+const SDKADMINID = process.env.CS_USER;
 const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
 const SDKAGENTID = '5ee731deb306f000111815db';
 const INVALIDTOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjQzMGVmNDEwYjdjYjBjYzI1ODAxODMiLCJvcmdhbml6YXRpb24iOiI1NjNmODA5ODM5NmM1MGRmNzc4NTdiNmQiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJncmFudF90eXBlIjoiYWNjZXNzX3Rva2VuIiwiaWF0IjoxNTkxODYwMzQzLCJleHAiOjE1OTE5NDY3NDN9.mdmn1Rg1rUxz5Hbe11mKsYzgHHVD2tqNeygJ1Qgsf-w';
-const SDKTESTORG = '5ee7317effa8ca00117c990e';
+const SDKTESTORG = process.env.CS_ORGANIZATION;
 
 mock.stopAll();
 const testId = Math.round(new Date().getTime() / 1000);
+
+const callLater = (func, after = 1000) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => { func().then(resolve).catch(reject); }, after);
+    });
+};
 
 let api;
 let bot;
@@ -55,7 +62,6 @@ const RESOURCES = [
 const equal = assert.deepStrictEqual;
 //use it.only to run one test
 //use describe.skip or xit to skip tests
-
 
 describe('Client tests', () => {
     describe('The API should have all the resources', () => {
@@ -133,7 +139,6 @@ describe('Client tests', () => {
         });
         it('Will return error if callback is not a function', (done) => {
             const middleware = (b, mess) => {
-                console.log('mess', mess);
                 equal(mess, { conversation: 'fakeconv', text: 'hello' }, 'middleware ok');
             };
             api = new Api(Object.assign({ ignoreBots: false, ignoreSelf: false },
@@ -161,7 +166,8 @@ describe('Client tests', () => {
                 equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
                 equal(conv.name, `SDK test nr ${testId}a`, 'should have the correct name');
                 equal(conv.organization, SDKTESTORG, 'should have the correct organization');
-                return api.conversations.delete(conv.id);
+                callLater(api.conversations.delete.bind(this, conv.id));
+                return Promise.resolve();
             }).then(done).catch((e) => {
                 equal(true, false, `should not have error ${e}`);
             });
@@ -176,7 +182,7 @@ describe('Client tests', () => {
                 equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
                 equal(conv.name, `SDK test nr ${testId}b`, 'should have the correct name');
                 equal(conv.organization, SDKTESTORG, 'should have the correct organization');
-                api.conversations.delete(conv.id);
+                callLater(api.conversations.delete.bind(this, conv.id));
                 done();
             });
             equal(call instanceof Promise, false, 'with callback should not return a promise');
@@ -193,10 +199,8 @@ describe('Client tests', () => {
                 equal(promise instanceof Promise, true, 'without callback should return a promise');
                 promise.then((message) => {
                     equal(message.text, 'second message');
-                }).then(() => api.conversations.delete(conv.id))
-                    .then(done).catch((e) => {
-                        equal(true, false, `should not have error ${e}`);
-                    });
+                }).then(done);
+                callLater(api.conversations.delete.bind(this, conv.id));
             });
         });
         it('You can send a text direcly to a conversation with a callback', (done) => {
@@ -208,9 +212,8 @@ describe('Client tests', () => {
             api.conversations.create(payload).then((conv) => {
                 const promise = api.send(conv.id, 'second message', (err, message) => {
                     equal(message.text, 'second message');
-                    api.conversations.delete(conv.id).then(done).catch((e) => {
-                        equal(true, false, `should not have error ${e}`);
-                    });
+                    done();
+                    callLater(api.conversations.delete.bind(this, conv.id));
                 });
                 equal(promise instanceof Promise, false, 'with callback should not return a promise');
             });
@@ -252,7 +255,7 @@ describe('Client tests', () => {
                     } catch (e) {
                         reject(e);
                     }
-                    await api.conversations.delete(conv.id);
+                    callLater(api.conversations.delete.bind(this, conv.id));
                 });
                 api.ingest(event);
             });
@@ -289,7 +292,7 @@ describe('Client tests', () => {
                         } catch (e) {
                             reject(e);
                         }
-                        await api.conversations.delete(conv.id);
+                        callLater(api.conversations.delete.bind(this, conv.id));
                     });
                     equal(call instanceof Promise, false, 'with callback should not return a promise');
                 });
@@ -343,7 +346,7 @@ describe('Client tests', () => {
                 }).catch((e) => {
                     equal(true, false, `should not have error ${e}`);
                     reject(e);
-                }).finally(api.conversations.delete.bind(this, conv.id));
+                }).finally(callLater(api.conversations.delete.bind(this, conv.id)));
             });
         });
         it('By using the Callback variant', () => {
@@ -383,7 +386,7 @@ describe('Client tests', () => {
                 const call = context.ask('what is your name?', (m, c) => {
                     equal(c.id, conv.id, 'Should have the correct conv id');
                     equal(m.text, 'mischa');
-                    api.conversations.delete(conv.id);
+                    callLater(api.conversations.delete.bind(this, conv.id));
                     resolve();
                 });
                 equal(call instanceof Promise, false, 'Should not return a promise');
@@ -439,7 +442,7 @@ describe('Client tests', () => {
                 api.registerCallback('answerHello', (m, c) => {
                     equal(c.id, conv.id, 'Should have the correct conv id');
                     equal(m.text, 'mischa', 'Should have the correct message');
-                    api.conversations.delete(conv.id);
+                    callLater(api.conversations.delete.bind(this, conv.id));
                     resolve();
                 });
                 const context = await api.conversation(conv.id);
@@ -501,7 +504,7 @@ describe('Client tests', () => {
                 api.onText('hello', (m, c) => {
                     equal(c.id, conv.id, 'Should have the correct conv id');
                     equal(m.text, 'hello', 'Should have the correct message');
-                    api.conversations.delete(conv.id);
+                    callLater(api.conversations.delete.bind(this, conv.id));
                     api.removeTextListener('hello');
                     resolve();
                 });
@@ -547,7 +550,7 @@ describe('Client tests', () => {
                     equal(c.id, conv.id, 'Should have the correct conv id');
                     equal(c.organization, SDKTESTORG, 'Should have organization id');
                     equal(m.text, 'hello', 'Should have the correct message');
-                    await api.conversations.delete(conv.id);
+                    await callLater(api.conversations.delete.bind(this, conv.id));
                     resolve();
                 });
                 setTimeout(api.ingest.bind(api, event), 0); //next tick
@@ -595,7 +598,7 @@ describe('Client tests', () => {
                             equal(c.id, conv.id, 'Should have the correct conv id');
                             equal(c.organization.name, 'SDK test organization', 'Should have organization details');
                             equal(m.text, 'hello', 'Should have the correct message');
-                            await api.conversations.delete(conv.id);
+                            callLater(api.conversations.delete.bind(this, conv.id));
                             resolve();
                         });
                     }
@@ -639,7 +642,7 @@ describe('Client tests', () => {
                         equal(m.text, 'hello', 'Should have the correct message');
                         const newContext = await api.conversation(conv.id);
                         equal(newContext.meta.mischa, 'crazy', 'Should have the correct meta');
-                        await api.conversations.delete(conv.id);
+                        callLater(api.conversations.delete.bind(this, conv.id));
                         resolve();
                     });
                     setTimeout(api.ingest.bind(api, event), 0); //next tick
