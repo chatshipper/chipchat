@@ -13,11 +13,11 @@ if (!TOKEN || !REFRESHTOKEN) {
     throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
 }
 
-const SDKADMINID = '5ee7372448d9940011151f42';
-const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
-const SDKAGENTID = '5ee731deb306f000111815db';
+const SDKADMINID = process.env.CS_ADMIN || '5ee7372448d9940011151f42';
+const SDKADMINEMAIL = process.env.CS_ADMIN_EMAIL || 'mischa+sdkadmin@chatshipper.com';
+const SDKAGENTID = process.env.CS_USER || '5ee731deb306f000111815db';
 const INVALIDTOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjQzMGVmNDEwYjdjYjBjYzI1ODAxODMiLCJvcmdhbml6YXRpb24iOiI1NjNmODA5ODM5NmM1MGRmNzc4NTdiNmQiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJncmFudF90eXBlIjoiYWNjZXNzX3Rva2VuIiwiaWF0IjoxNTkxODYwMzQzLCJleHAiOjE1OTE5NDY3NDN9.mdmn1Rg1rUxz5Hbe11mKsYzgHHVD2tqNeygJ1Qgsf-w';
-const SDKTESTORG = '5ee7317effa8ca00117c990e';
+const SDKTESTORG = process.env.CS_ORGANIZATION || '5ee7317effa8ca00117c990e';
 
 mock.stopAll();
 const testId = Math.round(new Date().getTime() / 1000);
@@ -133,7 +133,6 @@ describe('Client tests', () => {
         });
         it('Will return error if callback is not a function', (done) => {
             const middleware = (b, mess) => {
-                console.log('mess', mess);
                 equal(mess, { conversation: 'fakeconv', text: 'hello' }, 'middleware ok');
             };
             api = new Api(Object.assign({ ignoreBots: false, ignoreSelf: false },
@@ -144,7 +143,7 @@ describe('Client tests', () => {
                 call = api.send('fakeconv', 'hello', 'wrongcallback');
             } catch (e) {
                 equal(e instanceof Error, true, 'is an error');
-                equal(e.message, 'callback should be a function', 'should report callback is not a function');
+                equal(e.message, 'options is not an object', 'should report options is not an object');
                 done();
             }
             equal(call instanceof Promise, false, 'with callback should not return a promise');
@@ -593,7 +592,7 @@ describe('Client tests', () => {
                     if (request.method === 'GET' && count === 1) {
                         api.on('message', async (m, c) => {
                             equal(c.id, conv.id, 'Should have the correct conv id');
-                            equal(c.organization.name, 'SDK test organization', 'Should have organization details');
+                            equal(c.organization.status, 'active', 'Should have organization details');
                             equal(m.text, 'hello', 'Should have the correct message');
                             await api.conversations.delete(conv.id);
                             resolve();

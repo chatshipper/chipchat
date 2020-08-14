@@ -10,7 +10,7 @@ const Bot = require('../lib/chipchat');
 
 const TOKEN = process.env.CS_TOKEN;
 const REFRESHTOKEN = process.env.CS_REFRESHTOKEN;
-const USER = process.env.CS_USER || '5ee731deb306f000111815db';
+const USER = process.env.CS_ADMIN || '5ee7372448d9940011151f42';
 const ORGANIZATION = process.env.CS_ORGANIZATION || '5ee7317effa8ca00117c990e';
 const SECRET = process.env.CS_SECRET;
 const WEBHOOK_PATH = process.env.CS_WEBHOOK_PATH || '/';
@@ -35,20 +35,20 @@ describe('Create a new bot', () => {
         equal(bot instanceof Bot, true, 'not a bot');
     });
 
-    it('should have a valid authentication object after initilizing with a correct token', () => {
+    it('should have a valid authentication object after initializing with a correct token', () => {
         const bot = new Bot({ token: TOKEN });
         equal(bot.auth.organization, ORGANIZATION, 'Bad organization token');
         equal(bot.auth.user, USER, 'Bad user token');
     });
-    it('should not have an authentication object after initilizing without token', () => {
+    it('should not have an authentication object after initializing without token', () => {
         const bot = new Bot();
         equal(bot.auth, undefined);
     });
-    it('should not have an authentication object after initilizing with incorrect token', () => {
+    it('should not have an authentication object after initializing with incorrect token', () => {
         const bot = new Bot({ token: 'invalid' });
         equal(bot.auth, undefined);
     });
-    it('should not have an authentication object after initilizing with incorrect refresh token', () => {
+    it('should not have an authentication object after initializing with incorrect refresh token', () => {
         const bot = new Bot({ token: 'token' });
         bot.on('error', (error) => {
             console.log(error);

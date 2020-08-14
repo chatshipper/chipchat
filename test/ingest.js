@@ -9,8 +9,8 @@ if (!TOKEN || !REFRESHTOKEN) {
     throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
 }
 
-const SDKADMINID = '5ee7372448d9940011151f42';
-const SDKADMINEMAIL = 'mischa+sdkadmin@chatshipper.com';
+const SDKADMINID = process.env.CS_ADMIN || '5ee7372448d9940011151f42';
+const SDKADMINEMAIL = process.env.CS_ADMIN_EMAIL || 'mischa+sdkadmin@chatshipper.com';
 const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, email: SDKADMINEMAIL };
 let bot;
 
