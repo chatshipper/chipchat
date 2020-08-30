@@ -107,16 +107,30 @@ See [Extending](https://github.com/chatshipper/chipchat/tree/master/docs/extendi
 
 See [Internal API spec](https://github.com/chatshipper/chipchat/tree/master/docs/api.md) for a full list of possible constructor options. Some options can also be specified as environment variables. These are:
 
-| Option | Environment variable | Default value |
+| option | environment variable | default value |
 | --- | --- | --- |
-| |PORT | 3000 |
-| secret | SECRET | null |
-| webhook | WEBHOOK_PATH | / |
-| host | APIHOST | https://api.chatshipper.com |
+| |port | 3000 |
+| secret | secret | null |
+| webhook | webhook_path | / |
+| host | apihost | https://api.chatshipper.com |
 
-Running the test suite or the examples requires the `TOKEN` environment variable set as a valid API access token.
+## Testing
+
+To run the test suite you have to create a .env file in your local Project dir and add the following keys:
+
+| key | explanation |
+CS_ORGANIZATION=5ee7317e... | Create your own sdk test org in CS and add the org id here |
+CS_USER=5ee7372448... | Create an admin user in your test org and add its id here |
+CS_TOKEN=eyJhbGciOiJIUzI1Ni... | generate a token by logging in as the admin user and generate tokens in account > developer > tokens |
+CS_REFRESHTOKEN=eyJhbGciOiJ...| generate a refresh token and add here|
+
+then run:
+`npm run test`
+
 
 ## Examples
+
+Running thhe examples requires the `TOKEN` environment variable set as a valid API access token.
 
 For examples see the [examples](https://github.com/chatshipper/chipchat/tree/master/examples) folder. To try any of the examples, first set the `TOKEN` environment variable as a valid API access token:
 
