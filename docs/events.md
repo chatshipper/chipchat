@@ -15,7 +15,9 @@ Subscribe to an event and execute a callback when those events are emitted. Prim
 | `activity` | Any activity occurred | activity |
 | `<resource>.<action>` | A resource was created, updated or deleted. Eg. `organization.update` or `form.create` | webhook payload |
 | `message` | The bot received a text message. An alias for `message.create` | message, conversation |
-| `notify` | The bot was addressed directly | message, conversation |
+| `assign` | A conversation was assigned to the bot's inbox | message, conversation |
+| `mention` | A conversation was assigned to the bot's inbox | message, conversation |
+| `command` | A bot command was entered | message, conversation |
 
 On a `message.create` event (aliased by 'message'), one or two additional events are emitted:
   - `message.create.<conversation.type>.<message.type>`
@@ -68,28 +70,66 @@ bot.on('message.create.contact.chat.contact', (msg, conversation) => {
 ```
 For broader or more fine-grained event triggering, see also the use of wildcards and conditional filters below.
 
-#### Notify Events
+#### Bot-directed Events
 
-A `notify` event is triggered every time your bot gets:
+Some message creation events are instrumental for bots in participating in conversations. In addition to their regular `message` event trigger, these events _also_ trigger as a special event alias for ease of subscribing.
+
+Such a message event alias is triggered every time your bot gets:
 - **mentioned** in a conversation;
-- assigned a conversation in its **inbox**;
+- **assigned** a conversation in its inbox;
 - receives a **bot command**.
 
-Like message creation events, the callback receives a _Message_ and a _Conversation_ as its arguments.
+Like message creation events, the callback receives a _Message_ and a _Conversation_ as its arguments. The event aliases are:
 
-```javascript
-bot.on('notify', (message, conversation) => {
-  if (message.type === 'mention') {
-    conversation.say('Wazzup?');
-  } else if (message.type === 'command' && message.text === '/assign') {
-    // assume responsibility of the conversation
-    conversation.accept();
-  } else if (message.type === 'command' && message.text.startsWith('>')) {
-    conversation.say('Wazzup?', { isBackchannel: true });
-  }
+##### assign
+
+Triggered when a conversation is _assigned_ to a bot (by setting the inbox flag). This usually happens when a user starts a new conversation with the bot, or when an existing conversation is assigned to the bot by routing rules.
+```
+bot.on('assign', (message, conversation) => {
+    conversation.join();
 });
 ```
-**Note**: this should not be confused with the `channel.notify` event, which gets triggered on every agent channel notification.
+This event trigger is equivalent to:
+```
+const conditions = { type: 'command', text: '/assign', users: this.auth.user };
+bot.on('message', conditions, (message, conversation) => {});
+```
+
+##### mention
+
+Triggered when someone _mentions_ the bot in any conversation.
+```
+bot.on('mention', (message, conversation) => {
+    // Send a mention back
+    conversation.say({
+        text: `You said: ${msg.text}`,
+        type: 'mention',
+        meta: { targetUser: message.user }
+    });
+});
+```
+This event trigger is equivalent to:
+```
+const conditions = { type: 'mention', targetUser: this.auth.user };
+bot.on('message', conditions, (message, conversation) => {});
+```
+
+##### command
+
+Triggered when a _bot command_ is called in a conversation. Bot command responses should generally surface in the backstream.
+```
+bot.on('command', { text: '>location' }, (message, conversation) => {
+    conversation.say({
+        text: 'You are on planet earth now.',
+        isBackchannel: true
+    });
+});
+```
+This event trigger is equivalent to:
+```
+const conditions = { type: 'command', text: /^>/ };
+bot.on('message', conditions, (message, conversation) => {});
+```
 
 #### Resource Events
 
