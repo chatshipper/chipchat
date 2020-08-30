@@ -4,7 +4,7 @@
   "description": "ChatShipper JavaScript SDK",
   "main": "./lib/index.js",
   "engines": {
-    "node": ">=8.1.14"
+    "node": ">=10.19.0"
   },
   "scripts": {
     "jsdoc": "jsdoc -P ./package.json -r lib/ -d jsdoc/",
