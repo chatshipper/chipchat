@@ -18,7 +18,7 @@ ChipChat - ChatShipper SDK Main module
             * [.on(event, [conditionals], handler)](#module_ChipChat..ChipChat+on)
             * [.onText(regexp, callback)](#module_ChipChat..ChipChat+onText)
             * [.removeTextListener(regexp)](#module_ChipChat..ChipChat+removeTextListener) ⇒ <code>Object</code>
-            * [.onReply(chatId, messageId, callback)](#module_ChipChat..ChipChat+onReply) ⇒ <code>Number</code>
+            * [.addReplyListener(chatId, messageId, callback)](#module_ChipChat..ChipChat+addReplyListener) ⇒ <code>Number</code>
             * [.removeReplyListener(replyListenerId)](#module_ChipChat..ChipChat+removeReplyListener) ⇒ <code>Object</code>
             * [.ingest(payload, [signature])](#module_ChipChat..ChipChat+ingest)
             * [.conversation(connversationId, callback)](#module_ChipChat..ChipChat+conversation) ⇒ <code>Promise</code>
@@ -26,6 +26,7 @@ ChipChat - ChatShipper SDK Main module
             * [.mixin(methods)](#module_ChipChat..ChipChat.mixin)
     * [~ignoreSelfMiddleware()](#module_ChipChat..ignoreSelfMiddleware)
     * [~ignoreBotsMiddleware()](#module_ChipChat..ignoreBotsMiddleware)
+    * [~ignoreUnjoinedMiddleware()](#module_ChipChat..ignoreUnjoinedMiddleware)
 
 <a name="module_ChipChat..ChipChat"></a>
 
@@ -48,7 +49,7 @@ Create a new ChipChat bot
         * [.on(event, [conditionals], handler)](#module_ChipChat..ChipChat+on)
         * [.onText(regexp, callback)](#module_ChipChat..ChipChat+onText)
         * [.removeTextListener(regexp)](#module_ChipChat..ChipChat+removeTextListener) ⇒ <code>Object</code>
-        * [.onReply(chatId, messageId, callback)](#module_ChipChat..ChipChat+onReply) ⇒ <code>Number</code>
+        * [.addReplyListener(chatId, messageId, callback)](#module_ChipChat..ChipChat+addReplyListener) ⇒ <code>Number</code>
         * [.removeReplyListener(replyListenerId)](#module_ChipChat..ChipChat+removeReplyListener) ⇒ <code>Object</code>
         * [.ingest(payload, [signature])](#module_ChipChat..ChipChat+ingest)
         * [.conversation(connversationId, callback)](#module_ChipChat..ChipChat+conversation) ⇒ <code>Promise</code>
@@ -64,13 +65,16 @@ Create a new ChipChat instance
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | options | <code>object</code> |  | Constructor Options |
-| [options.token] | <code>string</code> |  | Chatshipper API Token, REQUIRED |
-| [options.secret] | <code>string</code> |  | Chatshipper Application Secret |
+| [options.token] | <code>string</code> |  | Chatshipper API Access Token |
+| [options.refreshToken] | <code>string</code> |  | Chatshipper API Refresh Token |
+| [options.email] | <code>string</code> |  | Primary email of the bot user. Used as clientId to renew          access tokens (based on the refresh token). |
+| [options.secret] | <code>string</code> |  | Chatshipper webhook Secret |
 | [options.host] | <code>string</code> |  | Target Chatshipper API server, defaults to https://api.chatshipper.com |
-| [options.webhook] | <code>string</code> |  | Webhook path segment, defaults to '/'. Only used by         the 'start' method. |
+| [options.webhook] | <code>string</code> |  | Webhook path segment, defaults to '/'. Only used by          the 'start' method. |
 | [options.ignoreSelf] | <code>boolean</code> | <code>true</code> | ignore any messages from yourself. |
-| [options.ignoreBots] | <code>boolean</code> | <code>true</code> | ignore any messages from other bot users |
-| [options.preloadOrganizations] | <code>boolean</code> | <code>false</code> | - |
+| [options.ignoreBots] | <code>boolean</code> | <code>true</code> | ignore any messages from other bot users. |
+| [options.ignoreUnjoined] | <code>boolean</code> | <code>false</code> | ignore any messages in conversations that          the bot hasn't joined. |
+| [options.preloadOrganizations] | <code>boolean</code> | <code>false</code> | prefetch organization record for          each conversation |
 | [options.onlyFirstMatch] | <code>boolean</code> | <code>false</code> | Set to true to stop after first match.          Otherwise, all regexps are executed. |
 | [options.middleware] | <code>string</code> |  | Middleware stack functions |
 | |{array} | <code>function</code> |  | options.middleware.send - A function or a list of functions for the          outbound pipeline |
@@ -186,9 +190,9 @@ Remove a listener registered with `onText()`.
 | --- | --- | --- |
 | regexp | <code>RegExp</code> | RegExp used previously in `onText()` |
 
-<a name="module_ChipChat..ChipChat+onReply"></a>
+<a name="module_ChipChat..ChipChat+addReplyListener"></a>
 
-#### chipChat.onReply(chatId, messageId, callback) ⇒ <code>Number</code>
+#### chipChat.addReplyListener(chatId, messageId, callback) ⇒ <code>Number</code>
 Register a reply to wait for a message response.
 
 **Kind**: instance method of [<code>ChipChat</code>](#module_ChipChat..ChipChat)  
@@ -273,6 +277,13 @@ Middleware that ignores messages from any bot user
 
 **Kind**: inner method of [<code>ChipChat</code>](#module_ChipChat)  
 **Api**: private  
+<a name="module_ChipChat..ignoreUnjoinedMiddleware"></a>
+
+### ChipChat~ignoreUnjoinedMiddleware()
+Middleware that ignores messages in unjoined conversations
+
+**Kind**: inner method of [<code>ChipChat</code>](#module_ChipChat)  
+**Api**: private  
 ## Functions
 
 <dl>
@@ -284,7 +295,7 @@ option to createServer.</p>
 <dt><a href="#start">start([port])</a></dt>
 <dd><p>Starts the <a href="http://expressjs.com">express</a> server on the specified port. Defaults port to 3000.</p>
 </dd>
-<dt><a href="#router">router(path, app)</a> ⇒</dt>
+<dt><a href="#router">router(pathPrefix, app)</a> ⇒</dt>
 <dd><p>Get an <a href="http://expressjs.com">express</a> router that can be used to
 expose HTTP endpoints</p>
 <pre><code>module.exports = bot =&gt; {
@@ -298,14 +309,13 @@ expose HTTP endpoints</p>
   routes.get(&#39;/hello-world&#39;, (req, res) =&gt; {
     res.end(&#39;Hello World&#39;);
   });
-};
-</code></pre><p>...or apply ChipChat routes in your own express app:</p>
+};</code></pre>
+<p>...or apply ChipChat routes in your own express app:</p>
 <pre><code>const express = require(&#39;express&#39;);
 const app = express();
 bot.router(&#39;/my-webhook&#39;, app);
-app.listen();
-`
-</code></pre></dd>
+app.listen();</code></pre>
+</dd>
 </dl>
 
 <a name="httpMiddleware"></a>
@@ -330,7 +340,7 @@ Starts the [express](http://expressjs.com) server on the specified port. Default
 
 <a name="router"></a>
 
-## router(path, app) ⇒
+## router(pathPrefix, app) ⇒
 Get an [express](http://expressjs.com) router that can be used to
 expose HTTP endpoints
 
@@ -361,7 +371,7 @@ app.listen();
 
 | Param | Description |
 | --- | --- |
-| path | the prefix for the routes |
+| pathPrefix | the prefix for the routes |
 | app | the Express app to attach the routes to |
 
 <a name="module_chipchat/client"></a>
