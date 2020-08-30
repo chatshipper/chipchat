@@ -25,36 +25,52 @@ GET /v2/forms/5c785defe8565165be1c4f66
 }
 
 Run the bot. The articles now surface as QuickReplies when the
-fields are filled or the form is triggered.
+fields are filled or the form is triggered. adding multiple lines to
+the article leads to multiple quick replies
 
  */
 
 const Bot = require('../lib/chipchat');
 
 const bot = new Bot({ token: process.env.TOKEN });
-
-const errHandle = err => console.log('botErr', err);
+const log = console.log;
+const errHandle = err => log('botErr', err);
 bot.on('error', errHandle);
 
-const wrap = payload => ({ text: payload, actions: [{ type: 'reply', payload }], meta: { hidden: true } });
+const wrap = payloads => ({ text: 'quick replies', actions: payloads.map(p => ({ type: 'reply', payload: p })), meta: { hidden: true } });
 
 bot
     .on('**.form', { text: /^\+/ }, (m, c) => {
-        bot.forms.get(m.meta.form).then((form) => {
-            if (form.meta && form.meta.init && /article:/.test(form.meta.init)) {
-                bot.articles.get(form.meta.init.split(':').pop()).then((article) => {
-                    c.say([wrap(article.content.replace(/^<p>(.*)<\/p>$/, '$1'))]);
-                }).catch(errHandle);
-            }
-        }).catch(errHandle);
+        log('form event', m);
+        if (m.meta.form) {
+            bot.forms.get(m.meta.form).then((form) => {
+                if (form.meta && form.meta.init && /article:/.test(form.meta.init)) {
+                    return bot.articles.get(form.meta.init.split(':').pop()).then((article) => {
+                        const replies = wrap(article.content
+                            .split(/\n/)
+                            .map(a => a.replace(/^<p>(.*)<\/p>$/, '$1'))
+                            .filter(q => q.trim() && q.trim() !== '<br />'));
+                        return c.say(replies);
+                    }).catch(errHandle);
+                }
+                return Promise.resolve();
+            }).catch(errHandle);
+        }
     })
     .on('**.field', (m, c) => {
-        bot.forms.get(m.meta.form).then((form) => {
-            if (form.meta && form.meta[m.meta.key] && /article:/.test(form.meta[m.meta.key])) {
-                bot.articles.get(form.meta[m.meta.key].split(':').pop()).then((article) => {
-                    c.say([wrap(article.content.replace(/^<p>(.*)<\/p>$/, '$1'))]);
-                }).catch(errHandle);
-            }
-        }).catch(errHandle);
-    })
-    .start();
+        log('field event', m);
+        if (m.meta.form) {
+            bot.forms.get(m.meta.form).then((form) => {
+                if (form.meta && form.meta[m.meta.key] && /article:/.test(form.meta[m.meta.key])) {
+                    return bot.articles.get(form.meta[m.meta.key].split(':').pop()).then((article) => {
+                        const replies = wrap(article.content
+                            .split(/\n/)
+                            .map(a => a.replace(/^<p>(.*)<\/p>$/, '$1'))
+                            .filter(q => q.trim() && q.trim() !== '<br />'));
+                        return c.say(replies);
+                    }).catch(errHandle);
+                }
+                return Promise.resolve();
+            }).catch(errHandle);
+        }
+    }).start();
