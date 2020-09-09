@@ -66,9 +66,9 @@ const equal = assert.deepStrictEqual;
 
 describe('Client tests', () => {
     describe('The API should have all the resources', () => {
+        api = new Api();
         RESOURCES.forEach((resource) => {
             it(`${resource} has all its methods`, () => {
-                api = new Api();
                 equal(Object.keys(api[resource]).sort(), METHODS);
             });
         });
@@ -90,9 +90,9 @@ describe('Client tests', () => {
             });
             api.users.get(SDKADMINID).then((user) => {
                 equal(user.id, SDKADMINID, 'should be the sdk admin user');
-            }).then(done).catch((e) => {
+            }).then(done);/*.catch((e) => {
                 equal(true, false, 'should not trigger error', e);
-            });
+            });*/
         });
         it('The API should throw when refresh token is also invalid', (done) => {
             api = new Api({
@@ -163,12 +163,15 @@ describe('Client tests', () => {
                 name: `SDK test nr ${testId}a`,
                 messages: [{ type: 'chat', text: 'hello world' }]
             };
-            api.conversations.create(payload).then((conv) => {
-                equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
-                equal(conv.name, `SDK test nr ${testId}a`, 'should have the correct name');
-                equal(conv.organization, SDKTESTORG, 'should have the correct organization');
-                callLater(api.conversations.delete.bind(this, conv.id));
-                return Promise.resolve();
+            api.conversations.create(payload).then((c) => {
+                return callLater(() => {
+                    return api.conversations.get(c.id).then(conv => {
+                        equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
+                        equal(conv.name, `SDK test nr ${testId}a`, 'should have the correct name');
+                        equal(conv.organization, SDKTESTORG, 'should have the correct organization');
+                        return callLater(api.conversations.delete.bind(this, conv.id));
+                    });
+                });
             }).then(done).catch((e) => {
                 equal(true, false, `should not have error ${e}`);
             });
@@ -179,12 +182,16 @@ describe('Client tests', () => {
                 name: `SDK test nr ${testId}b`,
                 messages: [{ type: 'chat', text: 'hello world' }]
             };
-            const call = api.conversations.create(payload, (err, conv) => {
-                equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
-                equal(conv.name, `SDK test nr ${testId}b`, 'should have the correct name');
-                equal(conv.organization, SDKTESTORG, 'should have the correct organization');
-                callLater(api.conversations.delete.bind(this, conv.id));
-                done();
+            const call = api.conversations.create(payload, (err, c) => {
+                setTimeout(() => {
+                    api.conversations.get(c.id, (err2, conv) => {
+                        equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
+                        equal(conv.name, `SDK test nr ${testId}b`, 'should have the correct name');
+                        equal(conv.organization, SDKTESTORG, 'should have the correct organization');
+                        callLater(api.conversations.delete.bind(this, conv.id));
+                        done();
+                    });
+                }, 1000);
             });
             equal(call instanceof Promise, false, 'with callback should not return a promise');
         });
