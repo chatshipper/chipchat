@@ -225,7 +225,7 @@ describe('Client tests', () => {
         // we need to return a promise and resolve/reject it accordingly
         // otherwise the tests will not fail properly
         it('By using the Promise variant', () => {
-            return new Promise(async (resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
                 }));
@@ -233,60 +233,23 @@ describe('Client tests', () => {
                     name: `SDK test nr ${testId}c`,
                     messages: [{ type: 'chat', text: 'first message' }]
                 };
-                const conv = await api.conversations.create(payload);
-                const event = { event: 'message.create.contact.chat',
-                    data: {
-                        conversation: {
-                            id: conv.id,
-                            organization: conv.organization
-                        },
-                        message: {
-                            conversation: conv.id,
-                            user: SDKAGENTID,
-                            text: 'hello world'
+                api.conversations.create(payload).then((conv) => {
+                    const event = { event: 'message.create.contact.chat',
+                        data: {
+                            conversation: {
+                                id: conv.id,
+                                organization: conv.organization
+                            },
+                            message: {
+                                conversation: conv.id,
+                                user: SDKAGENTID,
+                                text: 'hello world'
+                            }
                         }
-                    }
-                };
-                api.on('message', async (m, c) => {
-                    equal(m.text, 'hello world');
-                    const usedPayload = await c.say('hi there bot');
-                    try {
-                        equal(usedPayload.text, 'hi there bot');
-                        resolve();
-                    } catch (e) {
-                        reject(e);
-                    }
-                    callLater(api.conversations.delete.bind(this, conv.id));
-                });
-                api.ingest(event);
-            });
-        });
-        it('By using the Callback variant', () => {
-            return new Promise(async (resolve, reject) => {
-                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
-                    ignoreSelf: false
-                }));
-                const payload = {
-                    name: `SDK test nr ${testId}c`,
-                    messages: [{ type: 'chat', text: 'first message' }]
-                };
-                const conv = await api.conversations.create(payload);
-                const event = { event: 'message.create.contact.chat',
-                    data: {
-                        conversation: {
-                            id: conv.id,
-                            organization: conv.organization
-                        },
-                        message: {
-                            conversation: conv.id,
-                            user: SDKAGENTID,
-                            text: 'hello world'
-                        }
-                    }
-                };
-                api.on('message', async (m, c) => {
-                    equal(m.text, 'hello world');
-                    const call = await c.say('hi there bot', async (err, usedPayload) => {
+                    };
+                    api.on('message', async (m, c) => {
+                        equal(m.text, 'hello world');
+                        const usedPayload = await c.say('hi there bot');
                         try {
                             equal(usedPayload.text, 'hi there bot');
                             resolve();
@@ -295,9 +258,48 @@ describe('Client tests', () => {
                         }
                         callLater(api.conversations.delete.bind(this, conv.id));
                     });
-                    equal(call instanceof Promise, false, 'with callback should not return a promise');
+                    api.ingest(event);
                 });
-                api.ingest(event);
+            });
+        });
+        it('By using the Callback variant', () => {
+            return new Promise((resolve, reject) => {
+                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                    ignoreSelf: false
+                }));
+                const payload = {
+                    name: `SDK test nr ${testId}c`,
+                    messages: [{ type: 'chat', text: 'first message' }]
+                };
+                api.conversations.create(payload).then((conv) => {
+                    const event = { event: 'message.create.contact.chat',
+                        data: {
+                            conversation: {
+                                id: conv.id,
+                                organization: conv.organization
+                            },
+                            message: {
+                                conversation: conv.id,
+                                user: SDKAGENTID,
+                                text: 'hello world'
+                            }
+                        }
+                    };
+                    api.on('message', async (m, c) => {
+                        equal(m.text, 'hello world');
+                        const call = await c.say('hi there bot', async (err, usedPayload) => {
+                            try {
+                                equal(usedPayload.text, 'hi there bot');
+                                resolve();
+                            } catch (e) {
+                                reject(e);
+                            }
+                            callLater(api.conversations.delete.bind(this, conv.id));
+                        });
+                        equal(call instanceof Promise, false, 'with callback should not return a promise');
+                    });
+                    api.ingest(event);
+                });
             });
         });
     });
@@ -306,7 +308,7 @@ describe('Client tests', () => {
         // we need to return a promise and resolve/reject it accordingly
         // otherwise the tests will not fail properly
         it('By using the Promise variant', () => {
-            return new Promise(async (resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
                 }));
@@ -314,44 +316,46 @@ describe('Client tests', () => {
                     name: `SDK test nr ${testId}c`,
                     messages: [{ type: 'chat', text: 'first message' }]
                 };
-                const conv = await api.conversations.create(payload);
-                const context = await api.conversation(conv.id);
-                const event = { event: 'message.create.contact.chat',
-                    data: {
-                        conversation: {
-                            id: conv.id,
-                            organization: conv.organization,
-                            meta: {}
-                        },
-                        message: {
-                            conversation: conv.id,
-                            type: 'chat',
-                            role: 'contact',
-                            text: 'mischa'
-                        }
-                    }
-                };
-                // answer the context.ask below after /set _asked is finished
-                api.on('test.request.POST', async (request, json) => {
-                    if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
-                        const newContext = await api.conversation(conv.id);
-                        event.data.conversation.meta[`_asked${api.auth.user}`] = newContext.meta[`_asked${api.auth.user}`].toString();
-                        setTimeout(api.ingest.bind(api, event), 0); //next tick
-                    }
+                api.conversations.create(payload).then((conv) => {
+                    api.conversation(conv.id).then((context) => {
+                        const event = { event: 'message.create.contact.chat',
+                            data: {
+                                conversation: {
+                                    id: conv.id,
+                                    organization: conv.organization,
+                                    meta: {}
+                                },
+                                message: {
+                                    conversation: conv.id,
+                                    type: 'chat',
+                                    role: 'contact',
+                                    text: 'mischa'
+                                }
+                            }
+                        };
+                        // answer the context.ask below after /set _asked is finished
+                        api.on('test.request.POST', async (request, json) => {
+                            if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
+                                const newContext = await api.conversation(conv.id);
+                                event.data.conversation.meta[`_asked${api.auth.user}`] = newContext.meta[`_asked${api.auth.user}`].toString();
+                                setTimeout(api.ingest.bind(api, event), 0); //next tick
+                            }
+                        });
+                        const call = context.ask('what is your name?');
+                        equal(call instanceof Promise, true, 'Should return a promise');
+                        call.then((m) => {
+                            equal(m.text, 'mischa');
+                            resolve();
+                        }).catch((e) => {
+                            equal(true, false, `should not have error ${e}`);
+                            reject(e);
+                        }).finally(callLater(api.conversations.delete.bind(this, conv.id)));
+                    });
                 });
-                const call = context.ask('what is your name?');
-                equal(call instanceof Promise, true, 'Should return a promise');
-                call.then((m) => {
-                    equal(m.text, 'mischa');
-                    resolve();
-                }).catch((e) => {
-                    equal(true, false, `should not have error ${e}`);
-                    reject(e);
-                }).finally(callLater(api.conversations.delete.bind(this, conv.id)));
             });
         });
         it('By using the Callback variant', () => {
-            return new Promise(async (resolve) => {
+            return new Promise((resolve) => {
                 api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
                 }));
@@ -359,38 +363,40 @@ describe('Client tests', () => {
                     name: `SDK test nr ${testId}c`,
                     messages: [{ type: 'chat', text: 'first message' }]
                 };
-                const conv = await api.conversations.create(payload);
-                const context = await api.conversation(conv.id);
-                const event = { event: 'message.create.contact.chat',
-                    data: {
-                        conversation: {
-                            id: conv.id,
-                            organization: conv.organization,
-                            meta: {}
-                        },
-                        message: {
-                            conversation: conv.id,
-                            type: 'chat',
-                            role: 'contact',
-                            text: 'mischa'
-                        }
-                    }
-                };
-                // answer the context.ask below after /set _asked is finished
-                api.on('test.request.POST', async (request, json) => {
-                    if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
-                        const newContext = await api.conversation(conv.id);
-                        event.data.conversation.meta[`_asked${api.auth.user}`] = newContext.meta[`_asked${api.auth.user}`].toString();
-                        setTimeout(api.ingest.bind(api, event), 0); //next tick
-                    }
+                api.conversations.create(payload).then((conv) => {
+                    api.conversation(conv.id).then((context) => {
+                        const event = { event: 'message.create.contact.chat',
+                            data: {
+                                conversation: {
+                                    id: conv.id,
+                                    organization: conv.organization,
+                                    meta: {}
+                                },
+                                message: {
+                                    conversation: conv.id,
+                                    type: 'chat',
+                                    role: 'contact',
+                                    text: 'mischa'
+                                }
+                            }
+                        };
+                        // answer the context.ask below after /set _asked is finished
+                        api.on('test.request.POST', async (request, json) => {
+                            if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
+                                const newContext = await api.conversation(conv.id);
+                                event.data.conversation.meta[`_asked${api.auth.user}`] = newContext.meta[`_asked${api.auth.user}`].toString();
+                                setTimeout(api.ingest.bind(api, event), 0); //next tick
+                            }
+                        });
+                        const call = context.ask('what is your name?', (m, c) => {
+                            equal(c.id, conv.id, 'Should have the correct conv id');
+                            equal(m.text, 'mischa');
+                            callLater(api.conversations.delete.bind(this, conv.id));
+                            resolve();
+                        });
+                        equal(call instanceof Promise, false, 'Should not return a promise');
+                    });
                 });
-                const call = context.ask('what is your name?', (m, c) => {
-                    equal(c.id, conv.id, 'Should have the correct conv id');
-                    equal(m.text, 'mischa');
-                    callLater(api.conversations.delete.bind(this, conv.id));
-                    resolve();
-                });
-                equal(call instanceof Promise, false, 'Should not return a promise');
             });
         });
     });
@@ -431,7 +437,7 @@ describe('Client tests', () => {
     });
     describe('Using registerCallback', () => {
         it('named callback works', () => {
-            return new Promise(async (resolve) => {
+            return new Promise((resolve) => {
                 api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false
                 }));
@@ -439,45 +445,47 @@ describe('Client tests', () => {
                     name: `SDK test nr ${testId}c`,
                     messages: [{ type: 'chat', text: 'hello' }]
                 };
-                const conv = await api.conversations.create(payload);
-                api.registerCallback('answerHello', (m, c) => {
-                    equal(c.id, conv.id, 'Should have the correct conv id');
-                    equal(m.text, 'mischa', 'Should have the correct message');
-                    callLater(api.conversations.delete.bind(this, conv.id));
-                    resolve();
+                api.conversations.create(payload).then((conv) => {
+                    api.registerCallback('answerHello', (m, c) => {
+                        equal(c.id, conv.id, 'Should have the correct conv id');
+                        equal(m.text, 'mischa', 'Should have the correct message');
+                        callLater(api.conversations.delete.bind(this, conv.id));
+                        resolve();
+                    });
+                    api.conversation(conv.id).then((context) => {
+                        const event = { event: 'message.create.contact.chat',
+                            data: {
+                                conversation: {
+                                    id: conv.id,
+                                    organization: conv.organization,
+                                    meta: {}
+                                },
+                                message: {
+                                    conversation: conv.id,
+                                    type: 'chat',
+                                    role: 'contact',
+                                    text: 'mischa'
+                                }
+                            }
+                        };
+                        // answer the context.ask below after /set _asked is finished
+                        api.on('test.request.POST', async (request, json) => {
+                            if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
+                                const newContext = await api.conversation(conv.id);
+                                event.data.conversation.meta[`_asked${api.auth.user}`] = newContext.meta[`_asked${api.auth.user}`].toString();
+                                setTimeout(api.ingest.bind(api, event), 0); //next tick
+                            }
+                        });
+                        const call = context.ask('what is your name?', 'answerHello');
+                        equal(call instanceof Promise, false, 'Should not return a promise');
+                    });
                 });
-                const context = await api.conversation(conv.id);
-                const event = { event: 'message.create.contact.chat',
-                    data: {
-                        conversation: {
-                            id: conv.id,
-                            organization: conv.organization,
-                            meta: {}
-                        },
-                        message: {
-                            conversation: conv.id,
-                            type: 'chat',
-                            role: 'contact',
-                            text: 'mischa'
-                        }
-                    }
-                };
-                // answer the context.ask below after /set _asked is finished
-                api.on('test.request.POST', async (request, json) => {
-                    if (request.method === 'POST' && json.includes(`/set _asked${api.auth.user}`)) {
-                        const newContext = await api.conversation(conv.id);
-                        event.data.conversation.meta[`_asked${api.auth.user}`] = newContext.meta[`_asked${api.auth.user}`].toString();
-                        setTimeout(api.ingest.bind(api, event), 0); //next tick
-                    }
-                });
-                const call = context.ask('what is your name?', 'answerHello');
-                equal(call instanceof Promise, false, 'Should not return a promise');
             });
         });
     });
     describe('Using onText', () => {
         it('onText callback works', () => {
-            return new Promise(async (resolve) => {
+            return new Promise((resolve) => {
                 api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false, ignoreBots: false
                 }));
@@ -486,36 +494,37 @@ describe('Client tests', () => {
                     messages: [{ type: 'chat', text: 'hello' }]
                 };
                 // answer the context.ask below after /set _asked is finished
-                const conv = await api.conversations.create(payload);
-                const event = { event: 'message.create.contact.chat',
-                    data: {
-                        conversation: {
-                            id: conv.id,
-                            organization: conv.organization,
-                            meta: {}
-                        },
-                        message: {
-                            conversation: conv.id,
-                            type: 'chat',
-                            role: 'contact',
-                            text: 'hello'
+                api.conversations.create(payload).then((conv) => {
+                    const event = { event: 'message.create.contact.chat',
+                        data: {
+                            conversation: {
+                                id: conv.id,
+                                organization: conv.organization,
+                                meta: {}
+                            },
+                            message: {
+                                conversation: conv.id,
+                                type: 'chat',
+                                role: 'contact',
+                                text: 'hello'
+                            }
                         }
-                    }
-                };
-                api.onText('hello', (m, c) => {
-                    equal(c.id, conv.id, 'Should have the correct conv id');
-                    equal(m.text, 'hello', 'Should have the correct message');
-                    callLater(api.conversations.delete.bind(this, conv.id));
-                    api.removeTextListener('hello');
-                    resolve();
+                    };
+                    api.onText('hello', (m, c) => {
+                        equal(c.id, conv.id, 'Should have the correct conv id');
+                        equal(m.text, 'hello', 'Should have the correct message');
+                        callLater(api.conversations.delete.bind(this, conv.id));
+                        api.removeTextListener('hello');
+                        resolve();
+                    });
+                    setTimeout(api.ingest.bind(api, event), 0); //next tick
                 });
-                setTimeout(api.ingest.bind(api, event), 0); //next tick
             });
         });
     });
     describe('Using preloading of organization', () => {
         it('it does not preload the organization when not enabled', () => {
-            return new Promise(async (resolve) => {
+            return new Promise((resolve) => {
                 api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false,
                     ignoreBots: false
@@ -526,39 +535,40 @@ describe('Client tests', () => {
                     messages: [{ type: 'chat', text: 'hello' }]
                 };
                 // we get a conversation the preload later
-                const conv = await api.conversations.create(payload);
-                // we reset chipchat
-                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
-                    ignoreSelf: false,
-                    ignoreBots: false
-                }));
-                const event = { event: 'message.create.contact.chat',
-                    data: {
-                        conversation: {
-                            id: conv.id,
-                            organization: conv.organization,
-                            meta: {}
-                        },
-                        message: {
-                            conversation: conv.id,
-                            type: 'chat',
-                            role: 'contact',
-                            text: 'hello'
+                api.conversations.create(payload).then((conv) => {
+                    // we reset chipchat
+                    api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                        ignoreSelf: false,
+                        ignoreBots: false
+                    }));
+                    const event = { event: 'message.create.contact.chat',
+                        data: {
+                            conversation: {
+                                id: conv.id,
+                                organization: conv.organization,
+                                meta: {}
+                            },
+                            message: {
+                                conversation: conv.id,
+                                type: 'chat',
+                                role: 'contact',
+                                text: 'hello'
+                            }
                         }
-                    }
-                };
-                api.on('message', async (m, c) => {
-                    equal(c.id, conv.id, 'Should have the correct conv id');
-                    equal(c.organization, SDKTESTORG, 'Should have organization id');
-                    equal(m.text, 'hello', 'Should have the correct message');
-                    await callLater(api.conversations.delete.bind(this, conv.id));
-                    resolve();
+                    };
+                    api.on('message', async (m, c) => {
+                        equal(c.id, conv.id, 'Should have the correct conv id');
+                        equal(c.organization, SDKTESTORG, 'Should have organization id');
+                        equal(m.text, 'hello', 'Should have the correct message');
+                        await callLater(api.conversations.delete.bind(this, conv.id));
+                        resolve();
+                    });
+                    setTimeout(api.ingest.bind(api, event), 0); //next tick
                 });
-                setTimeout(api.ingest.bind(api, event), 0); //next tick
             });
         });
         it('it preloads the organization when enabled', () => {
-            return new Promise(async (resolve) => {
+            return new Promise((resolve) => {
                 api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false,
                     ignoreBots: false
@@ -569,48 +579,49 @@ describe('Client tests', () => {
                     messages: [{ type: 'chat', text: 'hello' }]
                 };
                 // we get a conversation the preload later
-                const conv = await api.conversations.create(payload);
-                // we reset chipchat
-                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
-                    ignoreSelf: false,
-                    ignoreBots: false,
-                    preloadOrganizations: true
-                }));
-                const event = { event: 'message.create.contact.chat',
-                    data: {
-                        conversation: {
-                            id: conv.id,
-                            organization: conv.organization,
-                            meta: {}
-                        },
-                        message: {
-                            conversation: conv.id,
-                            type: 'chat',
-                            role: 'contact',
-                            text: 'hello'
+                api.conversations.create(payload).then((conv) => {
+                    // we reset chipchat
+                    api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                        ignoreSelf: false,
+                        ignoreBots: false,
+                        preloadOrganizations: true
+                    }));
+                    const event = { event: 'message.create.contact.chat',
+                        data: {
+                            conversation: {
+                                id: conv.id,
+                                organization: conv.organization,
+                                meta: {}
+                            },
+                            message: {
+                                conversation: conv.id,
+                                type: 'chat',
+                                role: 'contact',
+                                text: 'hello'
+                            }
                         }
-                    }
-                };
-                let count = 0;
-                api.on('test.request.GET', async (request) => {
-                    count += 1;
-                    if (request.method === 'GET' && count === 1) {
-                        api.on('message', async (m, c) => {
-                            equal(c.id, conv.id, 'Should have the correct conv id');
-                            equal(c.organization.status, 'active', 'Should have organization details');
-                            equal(m.text, 'hello', 'Should have the correct message');
-                            callLater(api.conversations.delete.bind(this, conv.id));
-                            resolve();
-                        });
-                    }
+                    };
+                    let count = 0;
+                    api.on('test.request.GET', async (request) => {
+                        count += 1;
+                        if (request.method === 'GET' && count === 1) {
+                            api.on('message', async (m, c) => {
+                                equal(c.id, conv.id, 'Should have the correct conv id');
+                                equal(c.organization.status, 'active', 'Should have organization details');
+                                equal(m.text, 'hello', 'Should have the correct message');
+                                callLater(api.conversations.delete.bind(this, conv.id));
+                                resolve();
+                            });
+                        }
+                    });
+                    setTimeout(api.ingest.bind(api, event), 0); //next tick
                 });
-                setTimeout(api.ingest.bind(api, event), 0); //next tick
             });
         });
     });
     describe('Using context set', () => {
         it('it sets meta correctly', () => {
-            return new Promise(async (resolve) => {
+            return new Promise((resolve) => {
                 api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     ignoreSelf: false,
                     ignoreBots: false
@@ -621,34 +632,36 @@ describe('Client tests', () => {
                     messages: [{ type: 'chat', text: 'hello' }]
                 };
                 // we get a conversation the preload later
-                const conv = await api.conversations.create(payload);
-                const event = { event: 'message.create.contact.chat',
-                    data: {
-                        conversation: {
-                            id: conv.id,
-                            organization: conv.organization
-                        },
-                        message: {
-                            conversation: conv.id,
-                            type: 'chat',
-                            role: 'contact',
-                            text: 'hello'
+                api.conversations.create(payload).then((conv) => {
+                    const event = { event: 'message.create.contact.chat',
+                        data: {
+                            conversation: {
+                                id: conv.id,
+                                organization: conv.organization
+                            },
+                            message: {
+                                conversation: conv.id,
+                                type: 'chat',
+                                role: 'contact',
+                                text: 'hello'
+                            }
                         }
-                    }
-                };
-                const context = await api.conversation(conv.id);
-                api.on('test.request.POST', async () => {
-                    api.on('message', async (m, c) => {
-                        equal(c.id, conv.id, 'Should have the correct conv id');
-                        equal(m.text, 'hello', 'Should have the correct message');
-                        const newContext = await api.conversation(conv.id);
-                        equal(newContext.meta.mischa, 'crazy', 'Should have the correct meta');
-                        callLater(api.conversations.delete.bind(this, conv.id));
-                        resolve();
+                    };
+                    api.conversation(conv.id).then((context) => {
+                        api.on('test.request.POST', async () => {
+                            api.on('message', async (m, c) => {
+                                equal(c.id, conv.id, 'Should have the correct conv id');
+                                equal(m.text, 'hello', 'Should have the correct message');
+                                const newContext = await api.conversation(conv.id);
+                                equal(newContext.meta.mischa, 'crazy', 'Should have the correct meta');
+                                callLater(api.conversations.delete.bind(this, conv.id));
+                                resolve();
+                            });
+                            setTimeout(api.ingest.bind(api, event), 0); //next tick
+                        });
+                        context.set('mischa', 'crazy');
                     });
-                    setTimeout(api.ingest.bind(api, event), 0); //next tick
                 });
-                context.set('mischa', 'crazy');
             });
         });
     });
