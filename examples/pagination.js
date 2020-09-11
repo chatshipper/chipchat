@@ -3,8 +3,7 @@ const Sdk = require('../lib/chipchat');
 const sdk = new Sdk({
     token: process.env.TOKEN
 });
-//const conversation = '<your test conversation id with at least 20 messages>';
-const conversation = '5e063af76ced54001123a503';
+const conversation = '<your test conversation id with at least 20 messages>';
 
 // examples of pagination.all
 /*
