@@ -1,6 +1,8 @@
 const Sdk = require('../lib/chipchat');
 
-const sdk = new Sdk();
+const sdk = new Sdk({
+    token: process.env.TOKEN
+});
 // examples of pagination.all
 
 /*
