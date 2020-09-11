@@ -11,8 +11,8 @@ const conversation = '5e063af76ced54001123a503';
 (async () => {
     // activate pagination with all defaults:
     // pagination slice size 100
-    // countLimit 2000
-    // requestLimit 10000
+    // countLimit default max 2000 items. set to Infinity to get them all
+    // requestLimit default max 10000 requests. set to Infinity to get them all
     const messages = await sdk.messages.list({ conversation,
         pagination: {}
     });
@@ -38,7 +38,7 @@ sdk.messages.list({
             pagination: {
                 iterate: true, // this will make it an iterable
                 limit: 5,
-                countLimit: 20
+                countLimit: 20 // set to Infinity to get them all, defaults to 2000 max
             }
         });
         //eslint-disable-next-line
