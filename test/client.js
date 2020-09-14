@@ -23,6 +23,16 @@ const SDKTESTORG = process.env.CS_ORGANIZATION || '5ee7317effa8ca00117c990e';
 
 mock.stopAll();
 const testId = Math.round(new Date().getTime() / 1000);
+const testMessagesPagination = [
+    { type: 'chat', text: 'hello 1' }, { type: 'chat', text: 'hello 2' }, { type: 'chat', text: 'hello 3' }, { type: 'chat', text: 'hello 4' },
+    { type: 'chat', text: 'hello 5' }, { type: 'chat', text: 'hello 6' }, { type: 'chat', text: 'hello 7' }, { type: 'chat', text: 'hello 8' },
+    { type: 'chat', text: 'hello 9' }, { type: 'chat', text: 'hello 10' }, { type: 'chat', text: 'hello 11' }, { type: 'chat', text: 'hello 12' },
+    { type: 'chat', text: 'hello 13' }, { type: 'chat', text: 'hello 14' }, { type: 'chat', text: 'hello 15' }, { type: 'chat', text: 'hello 16' },
+    { type: 'chat', text: 'hello 17' }, { type: 'chat', text: 'hello 18' }, { type: 'chat', text: 'hello 19' }, { type: 'chat', text: 'hello 20' },
+    { type: 'chat', text: 'hello 21' }, { type: 'chat', text: 'hello 22' }, { type: 'chat', text: 'hello 23' }, { type: 'chat', text: 'hello 24' },
+    { type: 'chat', text: 'hello 25' }, { type: 'chat', text: 'hello 26' }, { type: 'chat', text: 'hello 27' }, { type: 'chat', text: 'hello 28' },
+    { type: 'chat', text: 'hello 29' }, { type: 'chat', text: 'hello 30' }
+];
 
 const callLater = (func, after = 1000) => {
     return new Promise((resolve, reject) => {
@@ -66,9 +76,9 @@ const equal = assert.deepStrictEqual;
 
 describe('Client tests', () => {
     describe('The API should have all the resources', () => {
+        api = new Api();
         RESOURCES.forEach((resource) => {
             it(`${resource} has all its methods`, () => {
-                api = new Api();
                 equal(Object.keys(api[resource]).sort(), METHODS);
             });
         });
@@ -90,9 +100,9 @@ describe('Client tests', () => {
             });
             api.users.get(SDKADMINID).then((user) => {
                 equal(user.id, SDKADMINID, 'should be the sdk admin user');
-            }).then(done).catch((e) => {
+            }).then(done);/*.catch((e) => {
                 equal(true, false, 'should not trigger error', e);
-            });
+            });*/
         });
         it('The API should throw when refresh token is also invalid', (done) => {
             api = new Api({
@@ -163,12 +173,15 @@ describe('Client tests', () => {
                 name: `SDK test nr ${testId}a`,
                 messages: [{ type: 'chat', text: 'hello world' }]
             };
-            api.conversations.create(payload).then((conv) => {
-                equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
-                equal(conv.name, `SDK test nr ${testId}a`, 'should have the correct name');
-                equal(conv.organization, SDKTESTORG, 'should have the correct organization');
-                callLater(api.conversations.delete.bind(this, conv.id));
-                return Promise.resolve();
+            api.conversations.create(payload).then((c) => {
+                return callLater(() => {
+                    return api.conversations.get(c.id).then(conv => {
+                        equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
+                        equal(conv.name, `SDK test nr ${testId}a`, 'should have the correct name');
+                        equal(conv.organization, SDKTESTORG, 'should have the correct organization');
+                        return callLater(api.conversations.delete.bind(this, conv.id));
+                    });
+                });
             }).then(done).catch((e) => {
                 equal(true, false, `should not have error ${e}`);
             });
@@ -179,12 +192,16 @@ describe('Client tests', () => {
                 name: `SDK test nr ${testId}b`,
                 messages: [{ type: 'chat', text: 'hello world' }]
             };
-            const call = api.conversations.create(payload, (err, conv) => {
-                equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
-                equal(conv.name, `SDK test nr ${testId}b`, 'should have the correct name');
-                equal(conv.organization, SDKTESTORG, 'should have the correct organization');
-                callLater(api.conversations.delete.bind(this, conv.id));
-                done();
+            const call = api.conversations.create(payload, (err, c) => {
+                setTimeout(() => {
+                    api.conversations.get(c.id, (err2, conv) => {
+                        equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
+                        equal(conv.name, `SDK test nr ${testId}b`, 'should have the correct name');
+                        equal(conv.organization, SDKTESTORG, 'should have the correct organization');
+                        callLater(api.conversations.delete.bind(this, conv.id));
+                        done();
+                    });
+                }, 1000);
             });
             equal(call instanceof Promise, false, 'with callback should not return a promise');
         });
@@ -661,6 +678,107 @@ describe('Client tests', () => {
                         });
                         context.set('mischa', 'crazy');
                     });
+                });
+            });
+        });
+    });
+    describe('Using Pagination', () => {
+        it('Pagination should be off by default', () => {
+            return new Promise((resolve) => {
+                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                    ignoreSelf: false,
+                    ignoreBots: false
+                }));
+                const name = `SDK test nr ${testId} pagination 1`;
+                const payload = {
+                    name,
+                    messages: testMessagesPagination
+                };
+                // we get a conversation the preload later
+                let count = 0;
+                api.conversations.create(payload).then((conv) => {
+                    api.messages.list({ conversation: conv.id, text: '~hello' }).then((messages) => {
+                        equal(messages.length, 30, 'should have 30 messages');
+                        callLater(api.conversations.delete.bind(this, conv.id), 1500);
+                        callLater(() => {
+                            equal(count, 1, 'should have called GET 1 time');
+                            return Promise.resolve();
+                        }).then(resolve);
+                    }).catch((e) => {
+                        equal(true, false, `should not trigger error: ${e}`);
+                    });
+                });
+                api.on('test.request.GET', async () => {
+                    count += 1;
+                });
+            });
+        });
+        it('Pagination should paginate in 3 slices when setup in api options', () => {
+            return new Promise((resolve) => {
+                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                    ignoreSelf: false,
+                    ignoreBots: false,
+                    pagination: {
+                        limit: 10
+                    }
+                }));
+                const name = `SDK test nr ${testId} pagination 1`;
+                const payload = {
+                    name,
+                    messages: testMessagesPagination
+                };
+                // we get a conversation the preload later
+                let count = 0;
+                api.conversations.create(payload).then((conv) => {
+                    api.messages.list({ conversation: conv.id, text: '~hello' }).then((messages) => {
+                        equal(messages.length, 30, 'should have 30 messages');
+                        callLater(api.conversations.delete.bind(this, conv.id), 1500);
+                        callLater(() => {
+                            equal(count, 3, 'should have called GET 3 times');
+                            return Promise.resolve();
+                        }).then(resolve);
+                    }).catch((e) => {
+                        equal(true, false, `should not trigger error: ${e}`);
+                    });
+                });
+                api.on('test.request.GET', async () => {
+                    count += 1;
+                });
+            });
+        });
+        it('Pagination should paginate in 3 slices when setup as list params', () => {
+            return new Promise((resolve) => {
+                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                    ignoreSelf: false,
+                    ignoreBots: false
+                }));
+                const name = `SDK test nr ${testId} pagination 1`;
+                const payload = {
+                    name,
+                    messages: testMessagesPagination
+                };
+                // we get a conversation the preload later
+                let count = 0;
+                api.conversations.create(payload).then((conv) => {
+                    api.messages.list({
+                        conversation: conv.id,
+                        text: '~hello',
+                        pagination: {
+                            limit: 10
+                        }
+                    }).then((messages) => {
+                        equal(messages.length, 30, 'should have 30 messages');
+                        callLater(api.conversations.delete.bind(this, conv.id), 1500);
+                        callLater(() => {
+                            equal(count, 3, 'should have called GET 3 times');
+                            return Promise.resolve();
+                        }).then(resolve);
+                    }).catch((e) => {
+                        equal(true, false, `should not trigger error: ${e}`);
+                    });
+                });
+                api.on('test.request.GET', async () => {
+                    count += 1;
                 });
             });
         });
