@@ -782,7 +782,7 @@ describe('Client tests', () => {
                 });
             });
         });
-        it.only('Paginate organizations', () => {
+        it('Paginate complex request', () => {
             return new Promise((resolve, reject) => {
                 api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
                     pagination: {
@@ -797,14 +797,9 @@ describe('Client tests', () => {
                     pagination: { limit: 50 }
                 };
                 // we get a conversation the preload later
-                let count = 0;
                 api.conversations.list(payload).then((conversations) => {
                     equal(conversations.length, 0);
-                    equal(count, 2);
                 }).then(resolve).catch(reject);
-                api.on('test.request.GET', async () => {
-                    count += 1;
-                });
             });
         });
     });
