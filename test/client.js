@@ -782,5 +782,30 @@ describe('Client tests', () => {
                 });
             });
         });
+        it.only('Paginate organizations', () => {
+            return new Promise((resolve, reject) => {
+                api = new Api(Object.assign({}, DEFAULTAPIOPTIONS, {
+                    pagination: {
+                        limit: 10
+                    }
+                }));
+                const payload = {
+                    updatedAt: '>=2020-09-14',
+                    orgPath: '^5978bf4b0296404e6f9947e5',
+                    participants: { inbox: true },
+                    select: 'id, updatedAt, participants',
+                    pagination: { limit: 50 }
+                };
+                // we get a conversation the preload later
+                let count = 0;
+                api.conversations.list(payload).then((conversations) => {
+                    equal(conversations.length, 0);
+                    equal(count, 2);
+                }).then(resolve).catch(reject);
+                api.on('test.request.GET', async () => {
+                    count += 1;
+                });
+            });
+        });
     });
 });
