@@ -6,7 +6,7 @@ const bot = new Bot({
     token: process.env.TOKEN
 });
 
-bot.on('message.create.*.chat', (payload, actions) => {
+bot.on('message.create.contact.chat.agent', (payload, actions) => {
     console.log('on.message', payload.text);
     if (payload.text === 'Ping') {
         actions.say('Pong', (err) => {
