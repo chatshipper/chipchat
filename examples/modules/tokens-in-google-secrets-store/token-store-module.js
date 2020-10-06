@@ -2,7 +2,7 @@ const debug = require('debug');
 const log = debug('google-secrets: store:');
 
 const { getStore } = require('./google-secret-manager');
-const { get, set } = getStore({ project: 'cs-microservices' });
+const { get, set } = getStore({ project: process.env.GOOGLEPROJECT });
 
 module.exports = (api, options) => {
     // We will still use the original functions.

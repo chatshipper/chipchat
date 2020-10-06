@@ -10,12 +10,19 @@ const tokenstore = require('./token-store-module');
 
 // The tokenid is the bots user id that is found in
 // the properties panel of the bot (for the bot owner)
-const tokenid = '5f773ebbe86b2e001d9cba47';
+// and exported on the console before your run this example
+const tokenid = process.env.BOTID;
 
-const bot = new ChipChat({ host: 'https://development-api.chatshipper.com'}); // no need for tokens
+// Options are empty by default
+// you can overrule the host
+const options = {};
+if (process.env.HOST) options.host = process.env.HOST;
+
+const bot = new ChipChat(options); // no need for tokens
+
 bot.module(tokenstore, { tokenid });
 
 //alternatively you can use new ChipChat({ token, refreshToken }) and bot.module(tokenstore);
 
-const conversationid = '5f74508c5c8917001ec2bee9';
+const conversationid = process.env.CONVERSATION;
 bot.conversations.get(conversationid).then(console.log);
