@@ -1,9 +1,9 @@
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const debug = require('debug');
-const client = new SecretManagerServiceClient();
 
+const client = new SecretManagerServiceClient();
 const getStore = (opts) => {
-    const name = `projects/${opts.project || process.env.GOOGLEPROJECT}/secrets`;;
+    const name = `projects/${opts.project || process.env.GOOGLEPROJECT}/secrets`;
     const log = debug(`google-secrets: store: initilizing ${name}`);
     return {
         get: async (key) => {
@@ -19,8 +19,8 @@ const getStore = (opts) => {
             await client.addSecretVersion({
                 parent: `${name}/${key}`,
                 payload: {
-                    data: Buffer.from(data.token, 'utf8'),
-                },
+                    data: Buffer.from(data.token, 'utf8')
+                }
             });
         }
     };
