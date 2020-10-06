@@ -1,0 +1,16 @@
+{
+  "name": "chipchat-google-secrets",
+  "version": "1.0.0",
+  "description": "Use Google Secret Store to save tokens in for chipchat",
+  "main": "example-usage.js",
+  "scripts": {
+    "start": "node example-usage.js"
+  },
+  "author": "Mischa Molhoek <mischa@chatshipper.com>",
+  "license": "SEE LICENSE IN license.txt",
+  "dependencies": {
+    "@google-cloud/secret-manager": "^3.2.0",
+    "chipchat": "^0.2.1",
+    "debug": "^4.2.0"
+  }
+}
