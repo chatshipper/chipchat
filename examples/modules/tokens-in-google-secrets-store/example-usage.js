@@ -1,3 +1,9 @@
+/*
+ * before you can use this, you have to set the 5f773ebbe86b2e001d9cba47_token and
+ * 5f773ebbe86b2e001d9cba47_refreshToken in the store from the CLI
+ * with echo -n "<paste your token here>" || gcloud secrets create 5f773ebbe86b2e001d9cba47_token
+ * --data-file=- --replication-policy automatic --project=<paste your project here>
+ */
 
 const ChipChat = require('chipchat');
 const tokenstore = require('./token-store-module');
