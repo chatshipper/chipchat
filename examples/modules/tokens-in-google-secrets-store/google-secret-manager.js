@@ -3,7 +3,7 @@ const debug = require('debug');
 const client = new SecretManagerServiceClient();
 
 const getStore = (opts) => {
-    const name = `projects/${opts.project || process.env.GOOGLEPROJECT}/${opts.store || process.env.GOOGLESTORE}`;
+    const name = `projects/${opts.project || process.env.GOOGLEPROJECT}/secrets`;;
     const log = debug(`google-secrets: store: initilizing ${name}`);
     return {
         get: async (key) => {
