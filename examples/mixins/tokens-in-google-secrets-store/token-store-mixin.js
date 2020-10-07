@@ -41,7 +41,9 @@ async function setTokens(tokens) {
         log(`setTokens: using tokenid ${tokenid}`);
         try {
             await set(`${tokenid}_token`, tokens.token); // Update store
+            cache[`${tokenid}_token`] = tokens.token; // Update cache
             await set(`${tokenid}_refreshToken`, tokens.refreshToken); // Update store
+            cache[`${tokenid}_refreshToken`] = tokens.refreshToken; // Update cache
         } catch (e) {
             log(`setTokens: darn, something went wrong: ${e}`);
         }
