@@ -12,21 +12,15 @@ async function getTokens() {
         const tokenid = this.auth.email.split(/\+|@/)[1];
         log(`getTokens: using tokenid ${tokenid}`);
         try {
-            let token = cache[`${tokenid}_token`];
-            if (token) {
-                log('token from cache');
+            let tokens = cache[`${tokenid}_tokens`];
+            if (tokens) {
+                log('tokens from cache');
             } else {
-                token = await get(`${tokenid}_token`); // From secret store
-                cache[`${tokenid}_token`] = token;
+                tokens = await get(`${tokenid}_tokens`); // From secret store
+                tokens = JSON.parse(tokens);
+                cache[`${tokenid}_token`] = tokens;
             }
-            let refreshToken = cache[`${tokenid}_refreshToken`];
-            if (refreshToken) {
-                log('refreshToken from cache');
-            } else {
-                refreshToken = await get(`${tokenid}_refreshToken`); // From secret store
-                cache[`${tokenid}_refreshToken`] = refreshToken;
-            }
-            return { token, refreshToken };
+            return tokens;
         } catch (e) {
             log(`getTokens: darn, something went wrong: ${e}`);
             return {};
@@ -40,10 +34,8 @@ async function setTokens(tokens) {
     if (tokenid) {
         log(`setTokens: using tokenid ${tokenid}`);
         try {
-            await set(`${tokenid}_token`, tokens.token); // Update store
-            cache[`${tokenid}_token`] = tokens.token; // Update cache
-            await set(`${tokenid}_refreshToken`, tokens.refreshToken); // Update store
-            cache[`${tokenid}_refreshToken`] = tokens.refreshToken; // Update cache
+            await set(`${tokenid}_tokens`, tokens); // Update store
+            cache[`${tokenid}_tokens`] = tokens; // Update cache
         } catch (e) {
             log(`setTokens: darn, something went wrong: ${e}`);
         }
