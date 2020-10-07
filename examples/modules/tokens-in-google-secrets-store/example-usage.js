@@ -6,23 +6,19 @@
  */
 
 const ChipChat = require('chipchat');
-const tokenstore = require('./token-store-module');
+const { getTokens, setTokens } = require('./token-store-mixin');
 
-// The tokenid is the bots user id that is found in
+ChipChat.mixin({ getTokens, setTokens });
+
+// The bots email is needed to request new tokens
+// with the refreshToken and is also used to store the
+// tokens in the google secrest store.
+// The bots user id that is found in
 // the properties panel of the bot (for the bot owner)
-// and exported on the console before your run this example
-const tokenid = process.env.BOTID;
+const email = `bot+${process.env.BOTID}@chatshipper.com`;
+const bot = new ChipChat({ email }); // no need for tokens, email is enought
 
-// Options are empty by default
-// you can overrule the host
-const options = {};
-if (process.env.HOST) options.host = process.env.HOST;
-
-const bot = new ChipChat(options); // no need for tokens
-
-bot.module(tokenstore, { tokenid });
-
-//alternatively you can use new ChipChat({ token, refreshToken }) and bot.module(tokenstore);
+//alternatively you can use new ChipChat({ token, refreshToken })
 
 const conversationid = process.env.CONVERSATION;
 bot.conversations.get(conversationid).then(console.log);
