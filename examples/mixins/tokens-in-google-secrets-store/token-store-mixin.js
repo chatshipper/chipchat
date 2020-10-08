@@ -1,9 +1,10 @@
 const debug = require('debug');
 const ChipChat = require('chipchat');
-const { getStore } = require('./google-secret-manager');
+const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 
+const client = new SecretManagerServiceClient();
 const log = debug('google-secrets: store:');
-const { get, set } = getStore({ project: process.env.GOOGLEPROJECT });
+const storename = `projects/${process.env.GOOGLEPROJECT}/secrets`;
 
 const cache = {};
 
@@ -16,9 +17,14 @@ async function getTokens() {
             if (tokens) {
                 log('tokens from cache');
             } else {
-                tokens = await get(`${tokenid}_tokens`); // From secret store
-                tokens = JSON.parse(tokens);
-                cache[`${tokenid}_token`] = tokens;
+                const [secret] = await client.accessSecretVersion({ name: `${storename}/${tokenid}_tokens/versions/latest` });
+                if (secret.payload && secret.payload.data) {
+                    tokens = secret.payload.data.toString();
+                    tokens = JSON.parse(tokens);
+                    cache[`${tokenid}_token`] = tokens;
+                } else {
+                    tokens = {};
+                }
             }
             return tokens;
         } catch (e) {
@@ -34,7 +40,12 @@ async function setTokens(tokens) {
     if (tokenid) {
         log(`setTokens: using tokenid ${tokenid}`);
         try {
-            await set(`${tokenid}_tokens`, tokens); // Update store
+            await client.addSecretVersion({
+                parent: `${storename}/${tokenid}_tokens`,
+                payload: {
+                    data: Buffer.from(tokens, 'utf8')
+                }
+            });
             cache[`${tokenid}_tokens`] = tokens; // Update cache
         } catch (e) {
             log(`setTokens: darn, something went wrong: ${e}`);
