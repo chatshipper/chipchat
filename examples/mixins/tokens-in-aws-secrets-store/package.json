@@ -1,0 +1,24 @@
+{
+  "name": "examplebot.storeawssecrets",
+  "version": "1.0.0",
+  "description": "Example how to store bot secrets for AWS.",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint *.js",
+    "start": "node example-usage.js"
+  },
+  "author": "Pascal Rijk <pascalrijk@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.764.0",
+    "chipchat": "^0.2.1",
+    "debug": "^4.2.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.8.1",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-node": "^11.1.0"
+  }
+}

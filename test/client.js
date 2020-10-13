@@ -84,6 +84,15 @@ describe('Client tests', () => {
         });
     });
     describe('Requesting Authentication', () => {
+        it('The API should throw if no token is specified', (done) => {
+            api = new Api({ email: SDKADMINEMAIL });
+            api.users.get(SDKADMINID).then((user) => {
+                equal(user, undefined, 'should not have user');
+            }).catch((e) => {
+                equal(e.message, 'token should be specified', 'should show token errro');
+                done();
+            });
+        });
         it('The API should have a valid token', (done) => {
             api = new Api(DEFAULTAPIOPTIONS);
             api.users.get(api.auth.user).then((user) => {
@@ -100,9 +109,9 @@ describe('Client tests', () => {
             });
             api.users.get(SDKADMINID).then((user) => {
                 equal(user.id, SDKADMINID, 'should be the sdk admin user');
-            }).then(done);/*.catch((e) => {
+            }).then(done).catch((e) => {
                 equal(true, false, 'should not trigger error', e);
-            });*/
+            });
         });
         it('The API should throw when refresh token is also invalid', (done) => {
             api = new Api({
