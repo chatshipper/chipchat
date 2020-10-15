@@ -16,6 +16,7 @@ const api = new Bot({
 });
 
 const logErr = err => err && log('error', err.toString());
+const oneSecond = () => new Promise((resolve) => setTimeout(resolve, 1000));
 
 // let us know when something ges wrong in api
 api.on('error', logErr);
@@ -29,6 +30,7 @@ api.forms.list({ organization: fromOrgId }).then(async (forms) => {
         forms.forEach(async (form) => {
             log(`copying form ${form.id}`, form);
             await api.forms.create({ ...form, organization: toOrgId }).catch(logErr);
+            await oneSecond;
         });
     } else {
         log('no forms found');
