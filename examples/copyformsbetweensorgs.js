@@ -1,3 +1,10 @@
+/*
+ * Copy forms from one org to another
+ * before your run this:
+ * export ORG1 (source org) and ORG2 (destination org)
+ * export TOKEN
+ */
+
 'use strict';
 
 const Bot = require('../lib/chipchat');
