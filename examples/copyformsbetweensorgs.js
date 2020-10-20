@@ -11,7 +11,6 @@ const Bot = require('../lib/chipchat');
 
 const log = console.log;
 const api = new Bot({
-    host: 'https://development-api.chatshipper.com',
     token: process.env.TOKEN
 });
 
