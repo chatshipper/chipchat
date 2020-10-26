@@ -84,15 +84,6 @@ describe('Client tests', () => {
         });
     });
     describe('Requesting Authentication', () => {
-        it('The API should throw if no token is specified', (done) => {
-            api = new Api({ email: SDKADMINEMAIL });
-            api.users.get(SDKADMINID).then((user) => {
-                equal(user, undefined, 'should not have user');
-            }).catch((e) => {
-                equal(e.message, 'token should be specified', 'should show token errro');
-                done();
-            });
-        });
         it('The API should have a valid token', (done) => {
             api = new Api(DEFAULTAPIOPTIONS);
             api.users.get(api.auth.user).then((user) => {
