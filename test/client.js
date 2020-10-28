@@ -61,7 +61,12 @@ mock('got', patchedGot);
 
 const Api = require('../lib/chipchat'); //eslint-disable-line
 
-const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, email: SDKADMINEMAIL };
+const DEFAULTAPIOPTIONS = {
+    token: TOKEN,
+    refreshToken: REFRESHTOKEN,
+    email: SDKADMINEMAIL,
+    preloadBots: false
+};
 const METHODS = ['create', 'delete', 'get', 'list', 'update'];
 const RESOURCES = [
     'users', 'channels', //'usergroups',
@@ -84,15 +89,6 @@ describe('Client tests', () => {
         });
     });
     describe('Requesting Authentication', () => {
-        it('The API should throw if no token is specified', (done) => {
-            api = new Api({ email: SDKADMINEMAIL });
-            api.users.get(SDKADMINID).then((user) => {
-                equal(user, undefined, 'should not have user');
-            }).catch((e) => {
-                equal(e.message, 'token should be specified', 'should show token errro');
-                done();
-            });
-        });
         it('The API should have a valid token', (done) => {
             api = new Api(DEFAULTAPIOPTIONS);
             api.users.get(api.auth.user).then((user) => {

@@ -19,7 +19,7 @@ const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
 if (!TOKEN || !REFRESHTOKEN) {
     throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
 }
-const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN };
+const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, preloadBots: false };
 
 require('dotenv').config({
     path: `${process.cwd()}${path.sep}.env`
