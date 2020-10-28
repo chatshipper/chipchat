@@ -61,7 +61,12 @@ mock('got', patchedGot);
 
 const Api = require('../lib/chipchat'); //eslint-disable-line
 
-const DEFAULTAPIOPTIONS = { token: TOKEN, refreshToken: REFRESHTOKEN, email: SDKADMINEMAIL };
+const DEFAULTAPIOPTIONS = {
+    token: TOKEN,
+    refreshToken: REFRESHTOKEN,
+    email: SDKADMINEMAIL,
+    preloadBots: false
+};
 const METHODS = ['create', 'delete', 'get', 'list', 'update'];
 const RESOURCES = [
     'users', 'channels', //'usergroups',
