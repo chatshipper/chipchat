@@ -3,7 +3,7 @@
 
 - Install ChipChat via NPM, create a new `index.js`, require ChipChat and create a new bot instance using your ChatShipper API token, refresh token and webhook secret.
 
-**Note:** If you don't know how to get these tokens, take a look at the ChatShipper [Developer Hub](https://developers.chatshipper.com/)
+**Note:** If you don't know how to get these tokens, take a look at the ChatShipper [Developer Hub](https://developers.chatshipper.com/quickstart/createbotjs/#before-you-start)
 
 **Important**: Be sure to login once, and re-use the same token in all your subsequent requests to the API. Do not generate new tokens from your code for every new request to the API.
 
