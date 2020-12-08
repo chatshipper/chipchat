@@ -50,7 +50,39 @@ describe('bot.ingest', () => {
             bot.ingest(payload);
         });
     });
-    describe('active middleware', () => {
+    describe.only('active middleware', () => {
+        it('should spread events when autoQueueMiddleware is active', (done) => {
+            bot = new Bot({ ...DEFAULTAPIOPTIONS, ignoreSelf: false, autoQueueIncoming: true });
+            const startTime = new Date();
+            let counter = 0;
+            const payloads = [
+                { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: SDKADMINID, text: 'message 1' } } },
+                { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: SDKADMINID, text: 'message 2' } } },
+                { event: 'message.create.contact.chat', data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: SDKADMINID, text: 'message 3' } } }
+            ];
+            bot.on('message', (message) => {
+                //should not receive the message as the user is the token user
+                counter += 1;
+                assert.equal(message.text, `message ${counter}`);
+                if (counter === 3) {
+                    const now = new Date();
+                    const passed = now - startTime;
+                    if (passed > counter * 1000) {
+                        done();
+                    } else {
+                        assert.equal(true, false, `should take about 3 seconds, took: ${passed}`);
+                    }
+                } else {
+                    bot.ingest(payloads[counter]);
+                }
+            });
+            bot.on('error', (error) => {
+                //should not get here, no errors were triggered
+                assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
+            });
+            bot.ingest(payloads[0]);
+            return true;
+        });
         it('should ignore message from self (ignoreSelfMiddleware)', () => {
             bot = new Bot(DEFAULTAPIOPTIONS);
             bot.on('message', (message, conversation) => {
