@@ -117,7 +117,8 @@ const sendInvitePerSMS = async (organization, ctx) => {
 bot.on('error', (err) => {
     log('error occured in SMSBot', err);
 });
-//let lastText = '';
+
+// the bot will listen to >smsbot, so configure smsbot as a command in the bot configuration.
 bot.on('message.create.system.command', { text: '>smsbot' }, async (m, c) => {
     const org = m.orgPath.split('#').slice(-1)[0];
     const conversationDetails = await bot.conversations.get(m.conversation, { select: 'participants' });
