@@ -68,6 +68,7 @@ const DEFAULTAPIOPTIONS = {
     preloadBots: false
 };
 const METHODS = ['create', 'delete', 'get', 'list', 'update'];
+const METHODS_MESSAGES = ['create', 'delete', 'get', 'list', 'replace', 'update'];
 const RESOURCES = [
     'users', 'channels', //'usergroups',
     'contacts', 'conversations', 'messages',
@@ -84,7 +85,10 @@ describe('Client tests', () => {
         api = new Api();
         RESOURCES.forEach((resource) => {
             it(`${resource} has all its methods`, () => {
-                equal(Object.keys(api[resource]).sort(), METHODS);
+                equal(
+                    Object.keys(api[resource]).sort(),
+                    resource === 'messages' ? METHODS_MESSAGES : METHODS
+                );
             });
         });
     });
