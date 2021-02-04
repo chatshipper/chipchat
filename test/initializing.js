@@ -40,21 +40,6 @@ describe('Create a new bot', () => {
         equal(bot.auth.organization, ORGANIZATION, 'Bad organization token');
         equal(bot.auth.user, USER, 'Bad user token');
     });
-    it('should not have an authentication object after initializing without token', () => {
-        const bot = new Bot();
-        equal(bot.auth, undefined);
-    });
-    it('should not have an authentication object after initializing with incorrect token', () => {
-        const bot = new Bot({ token: 'invalid' });
-        equal(bot.auth, undefined);
-    });
-    it('should not have an authentication object after initializing with incorrect refresh token', () => {
-        const bot = new Bot({ token: 'token' });
-        bot.on('error', (error) => {
-            console.log(error);
-        });
-        equal(bot.auth, undefined);
-    });
     it('Should have secret set to false by default', () => {
         const bot = new Bot();
         equal(bot.secret, SECRET || null);
