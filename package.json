@@ -1,6 +1,6 @@
 {
   "name": "chipchat",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "description": "ChatShipper JavaScript SDK",
   "main": "./lib/index.js",
   "engines": {
@@ -16,7 +16,7 @@
     "test:examples": "node examples/",
     "lint": "eslint lib",
     "lintAndTests": "npm run lint",
-    "preversion": "npm run lintAndTests",
+    "preversions": "npm run lintAndTests",
     "version": "",
     "postversion": "git push && git push --tags",
     "release-patch": "npm version patch --force -m \"version %s\"",
