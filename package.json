@@ -16,7 +16,7 @@
     "test:examples": "node examples/",
     "lint": "eslint lib",
     "lintAndTests": "npm run lint",
-    "preversions": "npm run lintAndTests",
+    "preversion": "npm run lintAndTests",
     "version": "",
     "postversion": "git push && git push --tags",
     "release-patch": "npm version patch --force -m \"version %s\"",
