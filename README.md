@@ -87,6 +87,25 @@ A conversation context encapsulates all properties of a ChatShipper conversation
 
 See [Conversations](docs/conversation.md) for more information.
 
+## Adding headers to each request
+
+Sometimes you want to add some special header to each request. Here is how to do this.
+
+```js
+const token = 'xxx';
+new ChipChat({
+    token,
+    fetchExtensions: {
+        beforeRequest: [async (options) => {
+            options.headers = {
+                 ...options.headers,
+                 'extraheader': 'some value'
+            }
+         }]
+    }
+}
+```
+
 ## Extending ChipChat
 
 ### Mixins
