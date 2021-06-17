@@ -126,4 +126,117 @@ describe('bot.ingest', () => {
             bot.ingest(payload);
         });
     });
+    describe('using async', () => {
+        it('should not return promise when not using async', () => {
+            bot = new Bot({ ...DEFAULTAPIOPTIONS });
+            const payload = { event: 'message.create.contact.chat', organization: 12345, data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: '', role: 'agent', text: 'hi' } } };
+            bot.on('message', (message, conversation) => {
+                //should receive the message
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message, 'is not the same');
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.on('error', (error) => {
+                //should not get here, no errors were triggered
+                assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
+            });
+            const promise = bot.ingest(payload);
+            assert.deepStrictEqual(typeof promise, 'undefined', 'it should NOT have returned anything');
+        });
+        it('should return promise when using async', () => {
+            bot = new Bot({ ...DEFAULTAPIOPTIONS });
+            const payload = { event: 'message.create.contact.chat', organization: 12345, data: { conversation: { id: 123456, organization: 12345 }, message: { conversation: 123456, user: '', role: 'agent', text: 'hi' } } };
+            bot.on('message', (message, conversation) => {
+                //should receive the message
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.on('error', (error) => {
+                //should not get here, no errors were triggered
+                assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
+            });
+            const promise = bot.ingest(payload, null, { async: true });
+            assert.deepStrictEqual(typeof promise.then, 'function', 'it should have returned a promise');
+            return promise.then(() => { return true; }).catch((e) => assert(true, false, 'it should not end up here', e));
+        });
+        it.only('should return promise when using async and all possible matchers', () => {
+            bot = new Bot({ ...DEFAULTAPIOPTIONS });
+            const payload = { event: 'message.create.contact.chat', organization: 12345, data: { conversation: { id: 123456, organization: 12345 }, message: { type: 'chat', conversation: 123456, user: '', role: 'agent', text: 'hi' } } };
+            let matched = 0;
+            bot.registerCallback('test', () => {
+                console.log(0);
+                matched += 1;
+            });
+            bot.on('**.chat', (message, conversation) => {
+                //should receive this message
+                const { id, organization } = conversation;
+                console.log(1);
+                matched += 1;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.on('message.create.contact.chat', (message, conversation) => {
+                //should receive this message
+                console.log(2);
+                matched += 1;
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.on('message.create.*.chat', (message, conversation) => {
+                //should receive this message
+                console.log(3);
+                matched += 1;
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.on('**.chat', (message, conversation) => {
+                //should receive this message
+                console.log(4);
+                matched += 1;
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.on('**.chat', { text: /hi/ }, (message, conversation) => {
+                //should receive this message
+                console.log(5);
+                matched += 1;
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.onText(/hi/, (message, conversation) => {
+                //should receive this message
+                console.log(6);
+                matched += 1;
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.onText(/hi/, (message, conversation) => {
+                console.log(7);
+                //should receive this message
+                matched += 1;
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            bot.on('message', 'test');
+            bot.onText(/hi/, 'test');
+            bot.on('error', (error) => {
+                //should not get here, no errors were triggered
+                assert.deepStrictEqual(null, error, `should not give this error: ${error.message}`);
+            });
+            const promise = bot.ingest(payload, null, { async: true });
+            assert.deepStrictEqual(typeof promise.then, 'function', 'it should have returned a promise');
+            return promise.then((...data) => {
+                assert.deepStrictEqual(data, [undefined], 'it should return an empty array');
+            }).catch((error) => assert.deepStrictEqual(null, error, `it should not end up here: ${error.message}`)).then(() => {
+                assert.deepStrictEqual(matched, 9, 'it should have passed along 2 matches');
+            });
+        });
+    });
 });
