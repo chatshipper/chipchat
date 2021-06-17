@@ -168,49 +168,42 @@ describe('bot.ingest', () => {
                 matched += 1;
             });
             bot.on('**.chat', (message, conversation) => {
-                //should receive this message
                 const { id, organization } = conversation;
                 matched += 1;
                 assert.deepStrictEqual(payload.data.message, message);
                 assert.deepStrictEqual(payload.data.conversation, { id, organization });
             });
             bot.on('message.create.contact.chat', (message, conversation) => {
-                //should receive this message
                 matched += 1;
                 const { id, organization } = conversation;
                 assert.deepStrictEqual(payload.data.message, message);
                 assert.deepStrictEqual(payload.data.conversation, { id, organization });
             });
             bot.on('message.create.*.chat', (message, conversation) => {
-                //should receive this message
                 matched += 1;
                 const { id, organization } = conversation;
                 assert.deepStrictEqual(payload.data.message, message);
                 assert.deepStrictEqual(payload.data.conversation, { id, organization });
             });
             bot.on('**.chat', (message, conversation) => {
-                //should receive this message
                 matched += 1;
                 const { id, organization } = conversation;
                 assert.deepStrictEqual(payload.data.message, message);
                 assert.deepStrictEqual(payload.data.conversation, { id, organization });
             });
             bot.on('**.chat', { text: /hi/ }, (message, conversation) => {
-                //should receive this message
                 matched += 1;
                 const { id, organization } = conversation;
                 assert.deepStrictEqual(payload.data.message, message);
                 assert.deepStrictEqual(payload.data.conversation, { id, organization });
             });
             bot.onText(/hi/, (message, conversation) => {
-                //should receive this message
                 matched += 1;
                 const { id, organization } = conversation;
                 assert.deepStrictEqual(payload.data.message, message);
                 assert.deepStrictEqual(payload.data.conversation, { id, organization });
             });
-            bot.onText(/hi/, (message, conversation) => {
-                //should receive this message
+            bot.onText('hi', (message, conversation) => {
                 matched += 1;
                 const { id, organization } = conversation;
                 assert.deepStrictEqual(payload.data.message, message);
@@ -227,7 +220,7 @@ describe('bot.ingest', () => {
             return promise.then((...data) => {
                 assert.deepStrictEqual(data, [undefined], 'it should return an empty array');
             }).catch((error) => assert.deepStrictEqual(null, error, `it should not end up here: ${error.message}`)).then(() => {
-                assert.deepStrictEqual(matched, 9, 'it should have passed along 2 matches');
+                assert.deepStrictEqual(matched, 9, 'it should have passed along all matches');
             });
         });
     });
