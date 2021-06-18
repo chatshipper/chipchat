@@ -226,7 +226,7 @@ describe('bot.ingest', () => {
         });
     });
     describe('using chipchat-tokens-to-google-secretmanager-mixin', () => {
-        it.only('should work with mixin', async () => {
+        it('should work with mixin', async () => {
             Bot.mixin({ getTokens, setTokens });
             bot = new Bot({
                 email: SDKADMINEMAIL,
@@ -234,6 +234,26 @@ describe('bot.ingest', () => {
             });
             const user = await bot.users.get(SDKADMINID);
             assert.deepStrictEqual(user.email, SDKADMINEMAIL, 'it got the correct user');
+        });
+        it('should work with ignoreUnjoined', async () => {
+            const payload = { event: 'message.create.contact.chat', organization: 12345, data: { conversation: { id: 123456, organization: 12345, participants: [] }, message: { type: 'chat', conversation: 123456, user: '', role: 'agent', text: 'hi' } } };
+            let matched = 0;
+            Bot.mixin({ getTokens, setTokens });
+            bot = new Bot({
+                email: SDKADMINEMAIL,
+                ignoreUnjoined: true,
+                preloadBots: false
+            });
+            bot.on('message.create.contact.chat', (message, conversation) => {
+                matched += 1;
+                const { id, organization } = conversation;
+                assert.deepStrictEqual(payload.data.message, message);
+                assert.deepStrictEqual(payload.data.conversation, { id, organization });
+            });
+            const promise = bot.ingest(payload, null, { async: true });
+            return promise.then(() => {
+                assert.deepStrictEqual(matched, 0, 'should not process the event');
+            });
         });
     });
 });
