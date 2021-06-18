@@ -1,4 +1,6 @@
 const assert = require('assert');
+const { getTokens, setTokens } = require('chipchat-tokens-to-google-secretmanager-mixin');
+
 const Bot = require('../lib/chipchat');
 
 const TOKEN = process.env.CS_TOKEN;
@@ -8,7 +10,6 @@ const USER = process.env.CS_USER || '5ee731deb306f000111815db';
 if (!TOKEN || !REFRESHTOKEN) {
     throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
 }
-
 const SDKADMINID = process.env.CS_ADMIN || '5ee7372448d9940011151f42';
 const SDKADMINEMAIL = process.env.CS_ADMIN_EMAIL || 'mischa+sdkadmin@chatshipper.com';
 const DEFAULTAPIOPTIONS = {
@@ -222,6 +223,17 @@ describe('bot.ingest', () => {
             }).catch((error) => assert.deepStrictEqual(null, error, `it should not end up here: ${error.message}`)).then(() => {
                 assert.deepStrictEqual(matched, 9, 'it should have passed along all matches');
             });
+        });
+    });
+    describe('using chipchat-tokens-to-google-secretmanager-mixin', () => {
+        it.only('should work with mixin', async () => {
+            Bot.mixin({ getTokens, setTokens });
+            bot = new Bot({
+                email: SDKADMINEMAIL,
+                preloadBots: false
+            });
+            const user = await bot.users.get(SDKADMINID);
+            assert.deepStrictEqual(user.email, SDKADMINEMAIL, 'it got the correct user');
         });
     });
 });

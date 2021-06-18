@@ -52,6 +52,7 @@
     "mware": "^1.0.1"
   },
   "devDependencies": {
+    "chipchat-tokens-to-google-secretmanager-mixin": "^1.3.4",
     "dotenv": "^10.0.0",
     "eslint": "^7.28.0",
     "eslint-config-airbnb-base": "^14.2.1",
