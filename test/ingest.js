@@ -1,17 +1,25 @@
 const assert = require('assert');
-const { getTokens, setTokens } = require('chipchat-tokens-to-google-secretmanager-mixin');
+const { getTokens, setTokens, clearCache: clearTokenCache } = require('chipchat-tokens-to-google-secretmanager-mixin');
+const got = require('got');
 
+const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const Bot = require('../lib/chipchat');
+const MixinBot = require('../lib/chipchat');
 
+MixinBot.mixin({ getTokens, setTokens });
 const TOKEN = process.env.CS_TOKEN;
 const REFRESHTOKEN = process.env.CS_REFRESHTOKEN;
 const USER = process.env.CS_USER || '5ee731deb306f000111815db';
-//const HOST = process.env.CS_APIHOST || 'https://api.chatshipper.com';
+const HOST = process.env.CS_APIHOST || 'https://api.web1on1.chat';
 if (!TOKEN || !REFRESHTOKEN) {
     throw new Error('WARNING: please add test token env var TOKEN and REFRESHTOKEN');
 }
 const SDKADMINID = process.env.CS_ADMIN || '5ee7372448d9940011151f42';
-const SDKADMINEMAIL = process.env.CS_ADMIN_EMAIL || 'mischa+sdkadmin@chatshipper.com';
+const SDKPASSWORD = process.env.CS_ADMIN_PASSWORD;
+const SDKADMINEMAIL = process.env.CS_ADMIN_EMAIL || 'bot+5ee7372448d9940011151f42@web1on1.chat';
+
+const client = new SecretManagerServiceClient();
+
 const DEFAULTAPIOPTIONS = {
     token: TOKEN,
     refreshToken: REFRESHTOKEN,
@@ -226,20 +234,38 @@ describe('bot.ingest', () => {
         });
     });
     describe('using chipchat-tokens-to-google-secretmanager-mixin', () => {
+        it('mixin setTokens should work', async () => {
+            await client.deleteSecret({ name: `projects/cs-microservices/secrets/${SDKADMINID}_tokens` }).catch(() => null);
+            const { body } = await got.post(`${HOST}/v2/auth/token`, { json: { email: SDKADMINEMAIL, password: SDKPASSWORD }, responseType: 'json' });
+            const tokens = await setTokens(body, false);
+            assert.deepStrictEqual(tokens.user, SDKADMINID, 'it got the correct user');
+        });
         it('should work with mixin', async () => {
-            Bot.mixin({ getTokens, setTokens });
-            bot = new Bot({
+            clearTokenCache();
+            bot = new MixinBot({
                 email: SDKADMINEMAIL,
                 preloadBots: false
             });
             const user = await bot.users.get(SDKADMINID);
             assert.deepStrictEqual(user.email, SDKADMINEMAIL, 'it got the correct user');
         });
+        it('should work getting tokens many times from store', async () => {
+            for await (const it of Array.from(Array(20).keys())) { // eslint-disable-line
+                const startAt = new Date();
+                clearTokenCache();
+                bot = new MixinBot({
+                    email: SDKADMINEMAIL,
+                    preloadBots: false
+                });
+                await bot.users.get(SDKADMINID);
+                const timeItTook = (new Date() - startAt) / 1000;
+                assert(timeItTook < 1, `it should be fasti, not ${timeItTook} secs`);
+            }
+        });
         it('should work with ignoreUnjoined', async () => {
             const payload = { event: 'message.create.contact.chat', organization: 12345, data: { conversation: { id: 123456, organization: 12345, participants: [] }, message: { type: 'chat', conversation: 123456, user: '', role: 'agent', text: 'hi' } } };
             let matched = 0;
-            Bot.mixin({ getTokens, setTokens });
-            bot = new Bot({
+            bot = new MixinBot({
                 email: SDKADMINEMAIL,
                 ignoreUnjoined: true,
                 preloadBots: false

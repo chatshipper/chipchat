@@ -16,7 +16,7 @@ if (!TOKEN || !REFRESHTOKEN) {
 }
 
 const SDKADMINID = process.env.CS_ADMIN || '5ee7372448d9940011151f42';
-const SDKADMINEMAIL = process.env.CS_ADMIN_EMAIL || 'mischa+sdkadmin@chatshipper.com';
+const SDKADMINEMAIL = process.env.CS_ADMIN_EMAIL || 'bot+5ee7372448d9940011151f42@web1on1.chat';
 const SDKAGENTID = process.env.CS_USER || '5ee731deb306f000111815db';
 const INVALIDTOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YjQzMGVmNDEwYjdjYjBjYzI1ODAxODMiLCJvcmdhbml6YXRpb24iOiI1NjNmODA5ODM5NmM1MGRmNzc4NTdiNmQiLCJzY29wZSI6InZpZXdlciBndWVzdCBhZ2VudCBib3QgYWRtaW4iLCJncmFudF90eXBlIjoiYWNjZXNzX3Rva2VuIiwiaWF0IjoxNTkxODYwMzQzLCJleHAiOjE1OTE5NDY3NDN9.mdmn1Rg1rUxz5Hbe11mKsYzgHHVD2tqNeygJ1Qgsf-w';
 const SDKTESTORG = process.env.CS_ORGANIZATION || '5ee7317effa8ca00117c990e';
