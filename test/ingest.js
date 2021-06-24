@@ -263,7 +263,7 @@ describe('bot.ingest', () => {
                 });
                 await bot.users.get(SDKADMINID);
                 const timeItTook = (new Date() - startAt) / 1000;
-                assert(timeItTook < 1, `it should be fasti, not ${timeItTook} secs`);
+                assert(timeItTook < 3, `it should be fast, not ${timeItTook} secs`);
             }
         });
         it('should work with ignoreUnjoined', async () => {
