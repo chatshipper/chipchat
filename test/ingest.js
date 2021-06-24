@@ -3,7 +3,11 @@ const { getTokens, setTokens, clearCache: clearTokenCache } = require('chipchat-
 const got = require('got');
 
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
+
+delete require.cache[require.resolve('../lib/chipchat')]; //load fresh chipchat
 const Bot = require('../lib/chipchat');
+
+delete require.cache[require.resolve('../lib/chipchat')]; //load fresh chipchat
 const MixinBot = require('../lib/chipchat');
 
 MixinBot.mixin({ getTokens, setTokens });

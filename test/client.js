@@ -59,6 +59,7 @@ const patchedGot = got.extend({
 });
 mock('got', patchedGot);
 
+delete require.cache[require.resolve('../lib/chipchat')]; //load fresh chipchat
 const Api = require('../lib/chipchat'); //eslint-disable-line
 
 const DEFAULTAPIOPTIONS = {

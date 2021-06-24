@@ -6,6 +6,7 @@ const path = require('path');
 
 mock.stopAll();
 
+delete require.cache[require.resolve('../lib/chipchat')]; //load fresh chipchat
 const Bot = require('../lib/chipchat');
 
 const TOKEN = process.env.CS_TOKEN;
