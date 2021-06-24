@@ -22,4 +22,4 @@ blocks:
             - npm test
       env_vars:
         - name: GOOGLE_APPLICATION_CREDENTIALS
-          value: .secrets/gcp.json
+          value: /home/semaphore/.secrets/gcp.json
