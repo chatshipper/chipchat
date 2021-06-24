@@ -23,6 +23,10 @@ blocks:
       env_vars:
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /home/semaphore/.secrets/gcp.json
+        - name: PROJECT
+          value: cs-microservices
+        - name: WPROJECT
+          value: cs-microservices
 
       prologue:
         commands:
