@@ -44,7 +44,7 @@
   "homepage": "https://github.com/chatshipper/chipchat#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
-    "debug": "^4.3.1",
+    "debug": "^4.3.2",
     "eventemitter2": "^6.4.4",
     "express": "^4.17.1",
     "got": "^11.8.2",
@@ -52,18 +52,18 @@
     "mware": "^1.0.1"
   },
   "devDependencies": {
-    "@google-cloud/secret-manager": "^3.7.1",
+    "@google-cloud/secret-manager": "^3.10.0",
     "chipchat-tokens-to-google-secretmanager-mixin": "^1.4.1",
     "dotenv": "^10.0.0",
-    "eslint": "^7.29.0",
+    "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-node": "^11.1.0",
     "jsdoc": "^3.6.7",
     "jsdoc-to-markdown": "^7.0.1",
-    "mocha": "^9.0.1",
+    "mocha": "^9.1.0",
     "mock-require": "^3.0.3",
     "nyc": "^15.1.0",
-    "sinon": "^11.1.1"
+    "sinon": "^11.1.2"
   }
 }
