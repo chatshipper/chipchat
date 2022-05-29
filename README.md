@@ -1,4 +1,4 @@
-**ChipChat** is the ChatShipper Node.js SDK that helps you manage ChatShipper resources and build chat bots. This library provides convenient access to the ChatShipper API from applications written in server-side JavaScript.
+**ChipChat** is the Web1on1 Node.js SDK that helps you manage Web1on1 resources and build chat bots. This library provides convenient access to the Web1on1 API from applications written in server-side JavaScript.
 
 ## Build status
 
@@ -14,7 +14,7 @@ Install the package with:
 
 ## Usage
 
-The package needs to be configured with your account's API token which is available in your [ChatShipper Dashboard](https://app.chatshipper.com/).
+The package needs to be configured with your account's API token which is available in your [Web1on1 Dashboard](https://app.web1on1.chat/).
 
 ```javascript
 'use strict';
@@ -62,7 +62,7 @@ See [Quickstart](https://github.com/chatshipper/chipchat/tree/master/docs/quicks
 
 ## Features
 
-- Full ChatShipper API v2 support
+- Full Web1on1 API v2 support
 - Start **conversations**, **ask** questions and save important information in the **context** of the conversation.
 - Organize your code in **modules** and **middleware**.
 - Subscribe to **events**.
@@ -77,13 +77,13 @@ Each resource has the methods `list`,`get`,`create`,`update` and `delete` availa
 
 ## Receiving Events
 
-You can subscribe to any webhook callback events received by the webhook with the `bot.on()` method. See our [webhooks guide](https://developers.chatshipper.com/docs/pg-webhooks#section-8-2-webhook-events) for a full list of possible events.
+You can subscribe to any webhook callback events received by the webhook with the `bot.on()` method. See our [webhooks guide](https://developers.web1on1.chat/webhooks/events/) for a full list of possible events.
 
 See [Events](https://github.com/chatshipper/chipchat/tree/master/docs/events.md) for more information on event subsriptions; read [Ingesting Events](https://github.com/chatshipper/chipchat/tree/master/docs/ingest.md) to see how to process payloads from webhooks and other sources.
 
 ## Sending Messages
 
-A conversation context encapsulates all properties of a ChatShipper conversation, augmented with message sending methods.
+A conversation context encapsulates all properties of a Web1on1 conversation, augmented with message sending methods.
 
 See [Conversations](docs/conversation.md) for more information.
 
@@ -131,7 +131,7 @@ See [Internal API spec](https://github.com/chatshipper/chipchat/tree/master/docs
 | |port | 3000 |
 | secret | secret | null |
 | webhook | webhook_path | / |
-| host | apihost | https://api.chatshipper.com |
+| host | apihost | https://api.web1on1.chat |
 
 ## Testing
 
@@ -162,4 +162,4 @@ Then, try any of the examples:
 
 ## Documentation
 
-See the [ChatShipper Developer Hub](https://developers.chatshipper.com/) for full platform documentation.
+See the [Web1on1 Developer Hub](https://developers.web1on1.chat/) for full platform documentation.

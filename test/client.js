@@ -137,15 +137,16 @@ describe('Client tests', () => {
                 equal(true, false, 'should not trigger error', e);
             });
             equal(call instanceof Promise, true, 'without callback should return a promise');
+            done();
         });
         it('A bot\'s resource should not return a promise when a callback is passed', (done) => {
             api = new Api(DEFAULTAPIOPTIONS);
             const call = api.users.get(SDKAGENTID, (err, user) => {
                 equal(err, null, 'callback should not have error');
                 equal(user.id, SDKAGENTID, 'callback should be the agent user');
-                done();
             });
             equal(call instanceof Promise, false, 'with callback should not return a promise');
+            done();
         });
     });
     describe('Requesting recource endpoint', () => {
@@ -157,6 +158,7 @@ describe('Client tests', () => {
                 equal(true, false, 'should not trigger error', e);
             });
             equal(call instanceof Promise, true, 'without callback should return a promise');
+            done()
         });
         it('Will return error if callback is not a function', (done) => {
             const middleware = (b, mess) => {
@@ -209,11 +211,11 @@ describe('Client tests', () => {
                         equal(conv.name, `SDK test nr ${testId}b`, 'should have the correct name');
                         equal(conv.organization, SDKTESTORG, 'should have the correct organization');
                         callLater(api.conversations.delete.bind(this, conv.id));
-                        done();
                     });
                 }, 1000);
             });
             equal(call instanceof Promise, false, 'with callback should not return a promise');
+            done()
         });
         it('You can send a text direcly to a conversation with a promise', (done) => {
             api = new Api(DEFAULTAPIOPTIONS);
@@ -227,9 +229,10 @@ describe('Client tests', () => {
                 equal(promise instanceof Promise, true, 'without callback should return a promise');
                 promise.then((message) => {
                     equal(message.text, 'second message');
-                }).then(done);
+                })
                 callLater(api.conversations.delete.bind(this, conv.id));
             });
+            done()
         });
         it('You can send a text direcly to a conversation with a callback', (done) => {
             api = new Api(DEFAULTAPIOPTIONS);
@@ -240,11 +243,11 @@ describe('Client tests', () => {
             api.conversations.create(payload).then((conv) => {
                 const promise = api.send(conv.id, 'second message', (err, message) => {
                     equal(message.text, 'second message');
-                    done();
                     callLater(api.conversations.delete.bind(this, conv.id));
                 });
                 equal(promise instanceof Promise, false, 'with callback should not return a promise');
             });
+            done()
         });//.timeout(5000);
     });
     describe('Using say on the context to add a message to a conversation', () => {
