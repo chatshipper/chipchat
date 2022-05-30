@@ -133,7 +133,7 @@ describe('Client tests', () => {
             api = new Api(DEFAULTAPIOPTIONS);
             const call = api.users.get(SDKAGENTID).then((user) => {
                 equal(user.id, SDKAGENTID);
-            }).then(done).catch((e) => {
+            }).catch((e) => {
                 equal(true, false, 'should not trigger error', e);
             });
             equal(call instanceof Promise, true, 'without callback should return a promise');
@@ -154,7 +154,7 @@ describe('Client tests', () => {
             api = new Api(DEFAULTAPIOPTIONS);
             const call = api.users.list({ id: SDKAGENTID }).then((users) => {
                 equal(users[0].id, SDKAGENTID);
-            }).then(done).catch((e) => {
+            }).catch((e) => {
                 equal(true, false, 'should not trigger error', e);
             });
             equal(call instanceof Promise, true, 'without callback should return a promise');
