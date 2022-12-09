@@ -39,7 +39,7 @@ describe('bot.ingest', () => {
         it('should generate an error when the payload is empty', (done) => {
             bot = new Bot();
             bot.on('error', (error) => {
-                assert.deepStrictEqual(error, { type: 'ingest', message: 'Invalid payload, missing event' });
+                assert.deepStrictEqual(error, new Error('Invalid payload, missing event', { type: 'ingest' }));
                 done();
             });
             bot.ingest();
@@ -47,7 +47,7 @@ describe('bot.ingest', () => {
         it('should generate an error when the event is missing on the payload', (done) => {
             bot = new Bot();
             bot.on('error', (error) => {
-                assert.deepStrictEqual(error, { type: 'ingest', message: 'Invalid payload, missing event' });
+                assert.deepStrictEqual(error, new Error('Invalid payload, missing event', { type: 'ingest' }));
                 done();
             });
             const payload = {};
@@ -56,7 +56,7 @@ describe('bot.ingest', () => {
         it('should generate an error when an message event arrives without a conversation in the payload', (done) => {
             bot = new Bot();
             bot.on('error', (error) => {
-                assert.deepStrictEqual(error, { type: 'ingest', message: 'Invalid payload, missing conversation' });
+                assert.deepStrictEqual(error, new Error('Invalid payload, missing conversation', { type: 'ingest' }));
                 done();
             });
             const payload = { event: 'message.create.contact.chat' };
