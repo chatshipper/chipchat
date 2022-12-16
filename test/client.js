@@ -34,7 +34,7 @@ const testMessagesPagination = [
     { type: 'chat', text: 'hello 29' }, { type: 'chat', text: 'hello 30' }
 ];
 
-const callLater = (func, after = 1000) => {
+const callLater = (func, after = 5000) => {
     return new Promise((resolve, reject) => {
         setTimeout(() => { func().then(resolve).catch(reject); }, after);
     });
@@ -248,7 +248,7 @@ describe('Client tests', () => {
                 equal(promise instanceof Promise, false, 'with callback should not return a promise');
             });
             done()
-        });//.timeout(5000);
+        });
     });
     describe('Using say on the context to add a message to a conversation', () => {
         // for mocha to play nice with our .on events which are async
