@@ -138,10 +138,12 @@ See [Internal API spec](https://github.com/chatshipper/chipchat/tree/master/docs
 To run the test suite you have to create a .env file in your local Project dir and add the following keys:
 
 | key | explanation |
-CS_ORGANIZATION=5ee7317e... | Create your own sdk test org in CS and add the org id here |
-CS_USER=5ee7372448... | Create an admin user in your test org and add its id here |
-CS_TOKEN=eyJhbGciOiJIUzI1Ni... | generate a token by logging in as the admin user and generate tokens in account > developer > tokens |
-CS_REFRESHTOKEN=eyJhbGciOiJ...| generate a refresh token and add here|
+| --- | --- |
+| CS_ORGANIZATION=5ee7317e... | Create your own sdk test org in CS and add the org id here |
+| CS_ADMIN=5ee7372448... | Id of a bot on sandbox organization |
+| CS_ADMIN_EMAIL=bot+5ee7372448...@web1on1.chat | email of the bot on sandbox organization and add its id here |
+| CS_TOKEN=eyJhbGciOiJIUzI1Ni... | generate a token by logging in as the admin user and generate tokens in account > developer > tokens |
+| CS_REFRESHTOKEN=eyJhbGciOiJ...| generate a refresh token and add here |
 
 then run:
 `npm run test`
