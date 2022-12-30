@@ -1,6 +1,6 @@
 {
   "name": "chipchat",
-  "version": "0.7.15",
+  "version": "0.7.16",
   "description": "Web1on1 JavaScript SDK",
   "main": "./lib/index.js",
   "engines": {
