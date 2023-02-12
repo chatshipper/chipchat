@@ -49,7 +49,7 @@
     "debug": "^4.3.4",
     "eventemitter2": "^6.4.9",
     "express": "^4.18.2",
-    "got": "^11.8.6",
+    "got": "^12.5.3",
     "jsonwebtoken": "^9.0.0",
     "mware": "^1.0.1"
   },
