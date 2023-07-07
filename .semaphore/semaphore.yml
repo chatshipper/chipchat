@@ -14,9 +14,10 @@ blocks:
         - name: Test
           commands:
             - checkout
-            - sem-version node 16
+            - nvm install v18.16.0
+            - nvm use v18.16.0
             - cache restore
-            - npm install
+            - npm ci
             - cache store
             - npm run build --if-present
             - npm test
