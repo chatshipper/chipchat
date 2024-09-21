@@ -191,7 +191,7 @@ describe('Client tests', () => {
                         equal(conv.participants[0].user, SDKADMINID, 'should have participant admin user');
                         equal(conv.name, `SDK test nr ${testId}a`, 'should have the correct name');
                         equal(conv.organization, SDKTESTORG, 'should have the correct organization');
-                        return callLater(api.conversations.delete.bind(this, conv.id));
+                        return callLater(api.conversations.delete.bind(this, conv.id), 100);
                     });
                 });
             }).then(done).catch((e) => {
