@@ -1,2 +1,6 @@
 test/*
 examples/**/node_modules
+.vscode/*
+.nyc_output/*
+coverage/*
+.semaphore/*
