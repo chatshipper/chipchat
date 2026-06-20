@@ -42,6 +42,9 @@
     "url": "https://github.com/chatshipper/chipchat/issues"
   },
   "homepage": "https://github.com/chatshipper/chipchat#readme",
+  "overrides": {
+    "lodash": "4.18.1"
+  },
   "dependencies": {
     "body-parser": "^1.20.1",
     "cache": "^3.0.0",
