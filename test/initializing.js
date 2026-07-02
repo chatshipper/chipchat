@@ -162,3 +162,61 @@ describe('Create a new bot', () => {
         bot.ingest(event);
     });
 });
+
+const jwt = require('jsonwebtoken');
+
+describe('JWT handling in the constructor', () => {
+    const claims = {
+        _id: 'user-1', organization: 'org-1', scope: 'admin bot', grant_type: 'access_token'
+    };
+    const signingSecret = 'test-signing-secret';
+    const signedToken = jwt.sign(claims, signingSecret);
+    const noneToken = jwt.sign(claims, null, { algorithm: 'none' });
+
+    it('rejects an alg:none forged token: claims must not populate this.auth', () => {
+        const bot = new Bot({ token: noneToken });
+        equal(bot.auth.user, undefined);
+        equal(bot.auth.organization, undefined);
+        equal(bot.auth.token, undefined);
+    });
+
+    it('accepts a well-formed token (no key) and populates this.auth from its claims', () => {
+        const bot = new Bot({ token: signedToken });
+        equal(bot.auth.user, 'user-1');
+        equal(bot.auth.organization, 'org-1');
+        equal(bot.auth.token, signedToken);
+    });
+
+    it('verifies the signature when a jwtKey is supplied and the key matches', () => {
+        const bot = new Bot({ token: signedToken, jwtKey: signingSecret });
+        equal(bot.auth.user, 'user-1');
+        equal(bot.auth.organization, 'org-1');
+    });
+
+    it('throws when a jwtKey is supplied and the signature does not match', () => {
+        assert.throws(
+            () => new Bot({ token: signedToken, jwtKey: 'wrong-secret' }),
+            /Invalid token/
+        );
+    });
+
+    it('throws for an alg:none token even when a jwtKey is supplied', () => {
+        assert.throws(
+            () => new Bot({ token: noneToken, jwtKey: signingSecret }),
+            /Invalid token/
+        );
+    });
+
+    it('decodeJwt returns null for an alg:none token', () => {
+        equal(Bot.decodeJwt(noneToken), null);
+    });
+
+    it('decodeJwt returns the payload for a token with an allowed algorithm', () => {
+        equal(Bot.decodeJwt(signedToken).organization, 'org-1');
+    });
+
+    it('verifyJwt returns claims for a valid signature and throws for a bad one', () => {
+        equal(Bot.verifyJwt(signedToken, signingSecret)._id, 'user-1');
+        assert.throws(() => Bot.verifyJwt(signedToken, 'wrong-secret'));
+    });
+});
