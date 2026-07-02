@@ -220,3 +220,70 @@ describe('JWT handling in the constructor', () => {
         assert.throws(() => Bot.verifyJwt(signedToken, 'wrong-secret'));
     });
 });
+
+const { generateKeyPairSync } = require('crypto');
+
+describe('JWKS / RS256 verification (constructor jwksUri)', () => {
+    const kid = 'test-kid-1';
+    const rsClaims = {
+        _id: 'user-9', organization: 'org-9', scope: 'admin bot', grant_type: 'access_token'
+    };
+    const signer = generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const attacker = generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const publicPem = signer.publicKey.export({ type: 'spki', format: 'pem' });
+    const rsToken = jwt.sign(rsClaims, signer.privateKey, { algorithm: 'RS256', keyid: kid });
+    const forgedToken = jwt.sign(rsClaims, attacker.privateKey, { algorithm: 'RS256', keyid: kid });
+
+    before(() => {
+        mock('jwks-rsa', () => ({
+            getSigningKey: async (requestedKid) => {
+                if (requestedKid !== kid) throw new Error(`unknown kid ${requestedKid}`);
+                return { getPublicKey: () => publicPem };
+            }
+        }));
+    });
+    after(() => mock.stop('jwks-rsa'));
+
+    it('verifies an RS256 token via JWKS and populates this.auth from verified claims', async () => {
+        const bot = new Bot({ token: rsToken, jwksUri: 'https://example.test/jwks.json' });
+        await bot.ready;
+        equal(bot.auth.user, 'user-9');
+        equal(bot.auth.organization, 'org-9');
+        equal(bot.auth.token, rsToken);
+    });
+
+    it('rejects a forged RS256 token: ready rejects, error emitted, no auth set', async () => {
+        const bot = new Bot({ token: forgedToken, jwksUri: 'https://example.test/jwks.json' });
+        let emitted = null;
+        bot.on('error', (e) => { emitted = e; });
+        await assert.rejects(bot.ready, /Invalid token/);
+        equal(bot.auth.user, undefined);
+        equal(emitted instanceof Error, true);
+    });
+
+    it('gives jwksUri precedence over jwtKey', async () => {
+        const bot = new Bot({
+            token: rsToken, jwksUri: 'https://example.test/jwks.json', jwtKey: 'unused-hs-secret'
+        });
+        await bot.ready;
+        equal(bot.auth.user, 'user-9');
+        equal(bot.auth.organization, 'org-9');
+    });
+
+    it('defers ingest until JWKS verification completes (auth.user available when processed)', async () => {
+        const bot = new Bot({
+            token: rsToken, jwksUri: 'https://example.test/jwks.json', ignoreBots: false, ignoreSelf: false
+        });
+        let seenUser;
+        const event = {
+            event: 'message.create.contact.chat',
+            data: {
+                conversation: { id: 'c1', organization: 'org-9', meta: {} },
+                message: { conversation: 'c1', type: 'chat', role: 'contact', text: 'hi' }
+            }
+        };
+        bot.middleware.receive.use((b, m, resolve) => { seenUser = b.auth.user; resolve(); });
+        await bot.ingest(event, undefined, { async: true });
+        equal(seenUser, 'user-9');
+    });
+});
